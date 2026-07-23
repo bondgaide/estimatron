@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estimatron – UI Style Options</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #f4f5f7;
+      color: #1a1d23;
+      padding: 32px 24px 48px;
+    }
+
+    h1 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #1a1d23; }
+    .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2.5px solid transparent;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.15s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+    }
+
+    .card.selected {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.18), 0 8px 28px rgba(0,0,0,0.12);
+    }
+
+    .card-label {
+      padding: 14px 16px;
+      font-weight: 600;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: auto;
+    }
+
+    /* ── OPTION A: Clean Light ── */
+    .mock-a { background: #ffffff; }
+    .mock-a .label-bar { background: #ffffff; border-top: 1px solid #e5e7eb; color: #374151; }
+    .mock-a .badge { background: #e0f2fe; color: #0369a1; }
+
+    .mock-a .app-header {
+      background: #ffffff;
+      padding: 14px 18px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mock-a .logo { font-size: 15px; font-weight: 800; color: #4f46e5; letter-spacing: -0.5px; }
+    .mock-a .logo span { color: #a5b4fc; }
+    .mock-a .tagline { font-size: 11px; color: #9ca3af; margin-left: auto; }
+
+    .mock-a .content { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+    .mock-a .input-box {
+      background: #f9fafb;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: #6b7280;
+      min-height: 54px;
+    }
+
+    .mock-a .upload-zone {
+      border: 1.5px dashed #c7d2fe;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: 10px;
+      color: #818cf8;
+      background: #eef2ff;
+    }
+
+    .mock-a .btn {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    .mock-a .table-section { padding: 0 18px 14px; }
+    .mock-a .group-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #6366f1;
+      padding: 6px 0 4px;
+      border-bottom: 1px solid #e0e7ff;
+      margin-bottom: 4px;
+    }
+    .mock-a .row {
+      display: flex;
+      align-items: center;
+      font-size: 10px;
+      padding: 4px 0;
+      color: #374151;
+      gap: 8px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .mock-a .row .task { flex: 1; }
+    .mock-a .row .md-input {
+      width: 36px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 10px;
+      color: #374151;
+      padding: 2px 4px;
+    }
+    .mock-a .total-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 2px solid #e0e7ff;
+    }
+    .mock-a .total-label { font-size: 11px; font-weight: 700; color: #374151; }
+    .mock-a .total-value { font-size: 13px; font-weight: 800; color: #4f46e5; }
+
+    /* ── OPTION B: Dark Professional ── */
+    .mock-b { background: #0f1117; }
+    .mock-b .label-bar { background: #0f1117; border-top: 1px solid #1e2130; color: #9ca3af; }
+    .mock-b .badge { background: #1a2744; color: #60a5fa; }
+
+    .mock-b .app-header {
+      background: #161b27;
+      padding: 14px 18px;
+      border-bottom: 1px solid #1e2130;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mock-b .logo { font-size: 15px; font-weight: 800; color: #60a5fa; letter-spacing: -0.5px; }
+    .mock-b .logo span { color: #3b82f6; }
+    .mock-b .tagline { font-size: 11px; color: #4b5563; margin-left: auto; }
+
+    .mock-b .content { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+    .mock-b .input-box {
+      background: #1a1f2e;
+      border: 1.5px solid #2d3548;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: #6b7280;
+      min-height: 54px;
+    }
+
+    .mock-b .upload-zone {
+      border: 1.5px dashed #2d4a7a;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: 10px;
+      color: #60a5fa;
+      background: #111827;
+    }
+
+    .mock-b .btn {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    .mock-b .table-section { padding: 0 18px 14px; }
+    .mock-b .group-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #60a5fa;
+      padding: 6px 0 4px;
+      border-bottom: 1px solid #1e2d45;
+      margin-bottom: 4px;
+    }
+    .mock-b .row {
+      display: flex;
+      align-items: center;
+      font-size: 10px;
+      padding: 4px 0;
+      color: #9ca3af;
+      gap: 8px;
+      border-bottom: 1px solid #1a1f2e;
+    }
+    .mock-b .row .task { flex: 1; }
+    .mock-b .row .md-input {
+      width: 36px;
+      background: #1a1f2e;
+      border: 1px solid #2d3548;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 10px;
+      color: #e2e8f0;
+      padding: 2px 4px;
+    }
+    .mock-b .total-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 2px solid #1e2d45;
+    }
+    .mock-b .total-label { font-size: 11px; font-weight: 700; color: #9ca3af; }
+    .mock-b .total-value { font-size: 13px; font-weight: 800; color: #60a5fa; }
+
+    /* ── OPTION C: Soft Gradient ── */
+    .mock-c { background: #fafafa; }
+    .mock-c .label-bar { background: #fafafa; border-top: 1px solid #e5e7eb; color: #374151; }
+    .mock-c .badge { background: #fef3c7; color: #b45309; }
+
+    .mock-c .app-header {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .mock-c .logo { font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: -0.5px; }
+    .mock-c .logo span { color: #c4b5fd; }
+    .mock-c .tagline { font-size: 11px; color: rgba(255,255,255,0.6); margin-left: auto; }
+
+    .mock-c .content { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+    .mock-c .input-box {
+      background: #ffffff;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: #6b7280;
+      min-height: 54px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .mock-c .upload-zone {
+      border: 1.5px dashed #ddd6fe;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      font-size: 10px;
+      color: #7c3aed;
+      background: #f5f3ff;
+    }
+
+    .mock-c .btn {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+      box-shadow: 0 3px 10px rgba(99,102,241,0.35);
+    }
+
+    .mock-c .table-section { padding: 0 18px 14px; }
+    .mock-c .group-header {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #7c3aed;
+      padding: 6px 0 4px;
+      border-bottom: 2px solid #ede9fe;
+      margin-bottom: 4px;
+    }
+    .mock-c .row {
+      display: flex;
+      align-items: center;
+      font-size: 10px;
+      padding: 4px 0;
+      color: #374151;
+      gap: 8px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .mock-c .row .task { flex: 1; }
+    .mock-c .row .md-input {
+      width: 36px;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 10px;
+      color: #4c1d95;
+      padding: 2px 4px;
+      font-weight: 600;
+    }
+    .mock-c .total-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 2px solid #ede9fe;
+    }
+    .mock-c .total-label { font-size: 11px; font-weight: 700; color: #374151; }
+    .mock-c .total-value { font-size: 13px; font-weight: 800; color: #6d28d9; }
+
+    /* ── Common ── */
+    .selected-check {
+      display: none;
+      width: 22px; height: 22px;
+      background: #4f46e5;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+    .card.selected .selected-check { display: flex; }
+
+  </style>
+</head>
+<body>
+
+  <h1>Which visual style feels right for Estimatron?</h1>
+  <p class="subtitle">Same layout, same features — pick the one that fits your team's taste. Click a card to select it.</p>
+
+  <div class="cards">
+
+    <!-- ── Option A: Clean Light ── -->
+    <div class="card mock-a" data-choice="a" onclick="toggleSelect(this)">
+      <div class="app-header">
+        <span class="logo">Estimatron<span>.</span></span>
+        <span class="tagline">AI-powered estimation</span>
+      </div>
+      <div class="content">
+        <div class="input-box">Paste feature requirements here…</div>
+        <div class="upload-zone">⬆ Drop wireframes or UI screenshots</div>
+        <button class="btn">Generate Estimate →</button>
+      </div>
+      <div class="table-section">
+        <div class="group-header">Frontend · 3.5 md</div>
+        <div class="row"><span class="task">Input form component</span><input class="md-input" value="1.5" /></div>
+        <div class="row"><span class="task">Image upload & preview</span><input class="md-input" value="1.0" /></div>
+        <div class="row"><span class="task">Responsive layout</span><input class="md-input" value="1.0" /></div>
+        <div class="group-header" style="margin-top:8px">Edge Cases · 2.0 md</div>
+        <div class="row"><span class="task">Empty state handling</span><input class="md-input" value="0.5" /></div>
+        <div class="row"><span class="task">API error feedback</span><input class="md-input" value="1.0" /></div>
+        <div class="total-bar">
+          <span class="total-label">Grand Total</span>
+          <span class="total-value">12.5 md</span>
+        </div>
+      </div>
+      <div class="label-bar card-label">
+        <div class="selected-check">✓</div>
+        A — Clean Light
+        <span class="badge">Recommended</span>
+      </div>
+    </div>
+
+    <!-- ── Option B: Dark Professional ── -->
+    <div class="card mock-b" data-choice="b" onclick="toggleSelect(this)">
+      <div class="app-header">
+        <span class="logo">Estimatron<span>.</span></span>
+        <span class="tagline">AI-powered estimation</span>
+      </div>
+      <div class="content">
+        <div class="input-box">Paste feature requirements here…</div>
+        <div class="upload-zone">⬆ Drop wireframes or UI screenshots</div>
+        <button class="btn">Generate Estimate →</button>
+      </div>
+      <div class="table-section">
+        <div class="group-header">Frontend · 3.5 md</div>
+        <div class="row"><span class="task">Input form component</span><input class="md-input" value="1.5" /></div>
+        <div class="row"><span class="task">Image upload & preview</span><input class="md-input" value="1.0" /></div>
+        <div class="row"><span class="task">Responsive layout</span><input class="md-input" value="1.0" /></div>
+        <div class="group-header" style="margin-top:8px">Edge Cases · 2.0 md</div>
+        <div class="row"><span class="task">Empty state handling</span><input class="md-input" value="0.5" /></div>
+        <div class="row"><span class="task">API error feedback</span><input class="md-input" value="1.0" /></div>
+        <div class="total-bar">
+          <span class="total-label">Grand Total</span>
+          <span class="total-value">12.5 md</span>
+        </div>
+      </div>
+      <div class="label-bar card-label">
+        <div class="selected-check">✓</div>
+        B — Dark Professional
+        <span class="badge">Premium</span>
+      </div>
+    </div>
+
+    <!-- ── Option C: Soft Gradient ── -->
+    <div class="card mock-c" data-choice="c" onclick="toggleSelect(this)">
+      <div class="app-header">
+        <span class="logo">Estimatron<span>.</span></span>
+        <span class="tagline">AI-powered estimation</span>
+      </div>
+      <div class="content">
+        <div class="input-box">Paste feature requirements here…</div>
+        <div class="upload-zone">⬆ Drop wireframes or UI screenshots</div>
+        <button class="btn">Generate Estimate →</button>
+      </div>
+      <div class="table-section">
+        <div class="group-header">Frontend · 3.5 md</div>
+        <div class="row"><span class="task">Input form component</span><input class="md-input" value="1.5" /></div>
+        <div class="row"><span class="task">Image upload & preview</span><input class="md-input" value="1.0" /></div>
+        <div class="row"><span class="task">Responsive layout</span><input class="md-input" value="1.0" /></div>
+        <div class="group-header" style="margin-top:8px">Edge Cases · 2.0 md</div>
+        <div class="row"><span class="task">Empty state handling</span><input class="md-input" value="0.5" /></div>
+        <div class="row"><span class="task">API error feedback</span><input class="md-input" value="1.0" /></div>
+        <div class="total-bar">
+          <span class="total-label">Grand Total</span>
+          <span class="total-value">12.5 md</span>
+        </div>
+      </div>
+      <div class="label-bar card-label">
+        <div class="selected-check">✓</div>
+        C — Soft Gradient
+        <span class="badge">Vibrant</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleSelect(el) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      if (window.recordChoice) window.recordChoice(el.dataset.choice, el.querySelector('.card-label').textContent.trim());
+    }
+  </script>
+
+</body>
+</html>

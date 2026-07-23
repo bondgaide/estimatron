@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estimatron</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #A100FF;
+      --accent-dim: rgba(161,0,255,0.15);
+      --accent-glow: rgba(161,0,255,0.3);
+      --bg: #0b0c10;
+      --surface: #0f1117;
+      --surface2: #141720;
+      --surface3: #1a1f2e;
+      --border: #1e2130;
+      --border2: #252b3b;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --text3: #475569;
+      --text4: #2d3548;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── App shell ── */
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .logo-dot {
+      width: 9px; height: 9px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent);
+      flex-shrink: 0;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.8px;
+    }
+    .logo span { color: var(--accent); }
+    .tagline {
+      font-size: 12px;
+      color: var(--text3);
+      margin-left: 4px;
+    }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      padding: 32px 40px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      margin-bottom: 10px;
+    }
+
+    /* ── Input card ── */
+    .input-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 28px;
+      width: 100%;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .textarea {
+      background: var(--surface2);
+      border: 1.5px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text2);
+      min-height: 130px;
+      resize: vertical;
+      outline: none;
+      line-height: 1.65;
+      width: 100%;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .textarea::placeholder { color: var(--text4); }
+
+    .upload-col { display: flex; flex-direction: column; gap: 10px; }
+
+    .upload-zone {
+      border: 1.5px dashed #3b1f5e;
+      border-radius: 10px;
+      padding: 20px 16px;
+      text-align: center;
+      background: #110d1a;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .upload-zone:hover { border-color: var(--accent); background: #15102060; }
+    .upload-icon { font-size: 22px; margin-bottom: 5px; }
+    .upload-text { font-size: 12px; color: #9333ea; font-weight: 600; }
+    .upload-sub { font-size: 10px; color: var(--text4); margin-top: 3px; }
+
+    .thumb-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .thumb {
+      width: 46px; height: 46px;
+      background: #1a1030;
+      border-radius: 8px;
+      border: 1px solid #3b1f5e;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      position: relative;
+    }
+    .thumb .x {
+      position: absolute; top: -5px; right: -5px;
+      width: 15px; height: 15px;
+      background: #374151; border-radius: 50%;
+      font-size: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #94a3b8; cursor: pointer;
+    }
+
+    .btn-generate {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 24px var(--accent-glow);
+      letter-spacing: 0.2px;
+      transition: box-shadow 0.15s, opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-generate:hover { box-shadow: 0 6px 32px rgba(161,0,255,0.55); }
+
+    /* ── Estimate section ── */
+    .estimate-section { width: 100%; }
+
+    .estimate-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    .estimate-toolbar {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .estimate-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .regen-btn {
+      background: none;
+      border: 1px solid var(--border2);
+      color: var(--text3);
+      border-radius: 7px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .export-btns { display: flex; gap: 8px; margin-left: auto; }
+    .btn-sm {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      border-radius: 7px;
+      padding: 6px 13px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-sm:hover { border-color: var(--accent); color: #c084fc; }
+
+    /* ── Table body ── */
+    .estimate-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── Group ── */
+    .group {}
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .group-name {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+    }
+    .group-line { flex: 1; height: 1px; background: #1e1030; }
+    .group-subtotal { font-size: 11px; color: var(--text3); font-weight: 600; }
+
+    /* ── Subgroup ── */
+    .subgroup { margin-top: 12px; }
+    .subgroup-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text3);
+      margin-bottom: 8px;
+      padding-left: 4px;
+      border-left: 2px solid var(--border2);
+      padding-bottom: 1px;
+    }
+
+    /* ── Task row ── */
+    .task-row {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      margin-bottom: 6px;
+      overflow: hidden;
+    }
+    .task-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+    }
+    .task-name {
+      flex: 1;
+      font-size: 13px;
+      color: #cbd5e1;
+      font-weight: 500;
+      padding-top: 1px;
+    }
+    .complexity-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .badge-high { background: #2d0a3e; color: #c084fc; border: 1px solid #6b21a8; }
+    .badge-med  { background: #1c1a30; color: #818cf8; border: 1px solid #3730a3; }
+    .badge-low  { background: #0f2210; color: #4ade80; border: 1px solid #166534; }
+
+    .md-input {
+      width: 48px;
+      background: #0f1117;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 4px 6px;
+      outline: none;
+      transition: border-color 0.15s;
+      flex-shrink: 0;
+    }
+    .md-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+    .md-unit { font-size: 10px; color: var(--text3); flex-shrink: 0; padding-top: 5px; }
+
+    /* ── Always-visible description ── */
+    .task-desc {
+      padding: 0 14px 12px 14px;
+      border-top: 1px solid #1a1020;
+      background: #0f0d16;
+      padding-top: 10px;
+    }
+    .desc-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #6b21a8;
+      margin-bottom: 5px;
+    }
+    .desc-text {
+      font-size: 11.5px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+    .desc-text strong { color: #94a3b8; }
+
+    /* ── Grand total bar ── */
+    .total-bar {
+      padding: 18px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      background: #0d0f15;
+    }
+    .total-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .total-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+    .total-unit { font-size: 13px; color: var(--text3); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo-dot"></div>
+    <span class="logo">Estimatron<span>.</span></span>
+    <span class="tagline">AI-powered manday estimation</span>
+  </header>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- ── INPUT CARD ── -->
+    <div class="input-card">
+      <div class="section-label">Requirements</div>
+      <div class="input-row">
+        <textarea class="textarea" placeholder="Paste feature description, user stories, or acceptance criteria here…&#10;&#10;E.g. &quot;Build a login screen with email/password, social login (Google), and a remember-me option…&quot;"></textarea>
+        <div class="upload-col">
+          <div class="upload-zone">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">Drop wireframes or screens</div>
+            <div class="upload-sub">PNG · JPG · Multiple files OK</div>
+          </div>
+          <div class="thumb-row">
+            <div class="thumb">🖼<span class="x">✕</span></div>
+            <div class="thumb">🖼<span class="x">✕</span></div>
+          </div>
+          <button class="btn-generate">⚡ Generate Estimate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ESTIMATE CARD (shown after generation) ── -->
+    <div class="estimate-section">
+      <div class="section-label">Estimate Sheet</div>
+      <div class="estimate-card">
+
+        <div class="estimate-toolbar">
+          <span class="estimate-title">Login Screen Feature</span>
+          <button class="regen-btn">↺ Re-generate</button>
+          <div class="export-btns">
+            <button class="btn-sm">📋 Copy</button>
+            <button class="btn-sm">⬇ Export CSV</button>
+          </div>
+        </div>
+
+        <div class="estimate-body">
+
+          <!-- ══ FRONTEND ══ -->
+          <div class="group">
+            <div class="group-header">
+              <span class="group-name">Frontend</span>
+              <div class="group-line"></div>
+              <span class="group-subtotal">7.0 md</span>
+            </div>
+
+            <!-- Core FE tasks -->
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Login form UI (email, password, remember-me checkbox)</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="1.0" />
+                <span class="md-unit">md</span>
+              </div>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Google OAuth social login button & redirect flow</span>
+                <span class="complexity-badge badge-high">Complex</span>
+                <input class="md-input" value="2.0" />
+                <span class="md-unit">md</span>
+              </div>
+              <div class="task-desc">
+                <div class="desc-label">Notes</div>
+                <div class="desc-text">
+                  Requires integrating <strong>Google Identity SDK</strong>, handling the OAuth popup vs. redirect flow, token exchange on the frontend, and syncing the returned JWT with the app's auth state. Different behaviour across <strong>Safari (ITP)</strong> and mobile browsers adds complexity. Popup-blocked fallback must be handled.
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Form validation & inline error messages</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="0.5" />
+                <span class="md-unit">md</span>
+              </div>
+            </div>
+
+            <!-- FE Edge Cases subgroup -->
+            <div class="subgroup">
+              <div class="subgroup-label">Edge Cases</div>
+
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">Invalid credentials — show field-level error vs. generic message</span>
+                  <span class="complexity-badge badge-low">Low</span>
+                  <input class="md-input" value="0.5" />
+                  <span class="md-unit">md</span>
+                </div>
+              </div>
+
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">Session persistence — remember-me vs. session-only token lifetime</span>
+                  <span class="complexity-badge badge-med">Medium</span>
+                  <input class="md-input" value="1.0" />
+                  <span class="md-unit">md</span>
+                </div>
+                <div class="task-desc">
+                  <div class="desc-label">Notes</div>
+                  <div class="desc-text">
+                    The "remember-me" flag must propagate to how the token is stored (<strong>localStorage vs. sessionStorage vs. httpOnly cookie</strong>). Different storage strategies affect how other tabs and the back button behave on re-visit.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- FE Testing subgroup -->
+            <div class="subgroup">
+              <div class="subgroup-label">Testing</div>
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">UI unit tests — form, validation states, error display</span>
+                  <span class="complexity-badge badge-low">Low</span>
+                  <input class="md-input" value="1.0" />
+                  <span class="md-unit">md</span>
+                </div>
+              </div>
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">Cross-browser smoke test (Chrome, Firefox, Safari)</span>
+                  <span class="complexity-badge badge-low">Low</span>
+                  <input class="md-input" value="1.0" />
+                  <span class="md-unit">md</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ══ BACKEND ══ -->
+          <div class="group">
+            <div class="group-header">
+              <span class="group-name">Backend</span>
+              <div class="group-line"></div>
+              <span class="group-subtotal">6.5 md</span>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">POST /auth/login — credential validation & JWT issuance</span>
+                <span class="complexity-badge badge-med">Medium</span>
+                <input class="md-input" value="1.5" />
+                <span class="md-unit">md</span>
+              </div>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Google OAuth callback handler & token verification</span>
+                <span class="complexity-badge badge-high">Complex</span>
+                <input class="md-input" value="2.0" />
+                <span class="md-unit">md</span>
+              </div>
+              <div class="task-desc">
+                <div class="desc-label">Notes</div>
+                <div class="desc-text">
+                  Must verify the <strong>Google ID token signature</strong>, extract the user profile, upsert a user record (new vs. returning), and decide whether to link to an existing email/password account. Token revocation and account-linking conflict resolution are non-trivial edge paths.
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Remember-me: long-lived refresh token issuance & rotation</span>
+                <span class="complexity-badge badge-med">Medium</span>
+                <input class="md-input" value="1.0" />
+                <span class="md-unit">md</span>
+              </div>
+            </div>
+
+            <!-- BE Edge Cases -->
+            <div class="subgroup">
+              <div class="subgroup-label">Edge Cases</div>
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">Brute-force protection — rate limiting on /auth/login</span>
+                  <span class="complexity-badge badge-med">Medium</span>
+                  <input class="md-input" value="0.5" />
+                  <span class="md-unit">md</span>
+                </div>
+              </div>
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">Account already exists with different auth method conflict</span>
+                  <span class="complexity-badge badge-high">Complex</span>
+                  <input class="md-input" value="1.0" />
+                  <span class="md-unit">md</span>
+                </div>
+                <div class="task-desc">
+                  <div class="desc-label">Notes</div>
+                  <div class="desc-text">
+                    When a user signs in via Google with an email already registered as email/password, the system must decide: <strong>auto-link, prompt to link, or reject</strong>. This requires a clear product decision and affects DB schema (multi-provider accounts).
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BE Testing -->
+            <div class="subgroup">
+              <div class="subgroup-label">Testing</div>
+              <div class="task-row">
+                <div class="task-main">
+                  <span class="task-name">API integration tests — login, token refresh, OAuth callback</span>
+                  <span class="complexity-badge badge-med">Medium</span>
+                  <input class="md-input" value="0.5" />
+                  <span class="md-unit">md</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end estimate-body -->
+
+        <!-- Grand total -->
+        <div class="total-bar">
+          <span class="total-label">Grand Total</span>
+          <span class="total-value">13.5</span>
+          <span class="total-unit">mandays</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end main -->
+</div><!-- end app -->
+
+<script>
+  // Live grand total
+  function recalc() {
+    let total = 0;
+    document.querySelectorAll('.md-input').forEach(inp => { total += parseFloat(inp.value) || 0; });
+    document.querySelector('.total-value').textContent = total.toFixed(1);
+  }
+  document.querySelectorAll('.md-input').forEach(inp => inp.addEventListener('input', recalc));
+</script>
+</body>
+</html>

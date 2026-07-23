@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(C:/Users/surote.gaide/.claude/plugins/superpowers/skills/brainstorming/scripts/start-server.sh --project-dir \"C:/Users/surote.gaide/Desktop/estimatron\" --open)",
+      "Bash(\"C:/Users/surote.gaide/.claude/plugins/superpowers/skills/subagent-driven-development/scripts/task-brief\" \"docs/superpowers/plans/2026-07-23-estimatron.md\" 1)",
+      "Bash(git init *)",
+      "Bash(\"C:/Users/surote.gaide/.claude/plugins/superpowers/skills/subagent-driven-development/scripts/review-package\" \"4b825dc642cb6eb9a060e54bf8d69288fbee4904\" HEAD)",
+      "Bash(\"C:/Users/surote.gaide/.claude/plugins/superpowers/skills/subagent-driven-development/scripts/task-brief\" \"docs/superpowers/plans/2026-07-23-estimatron.md\" 2)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\review-package\" e3bac18 HEAD)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\task-brief\" \"docs/superpowers/plans/2026-07-23-estimatron.md\" 3)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\review-package\" 8240d15 HEAD)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\task-brief\" \"docs/superpowers/plans/2026-07-23-estimatron.md\" 4)",
+      "PowerShell(cd \"C:\\\\Users\\\\surote.gaide\\\\Desktop\\\\estimatron\"; $proc = Start-Process node -ArgumentList \"server.js\" -PassThru -RedirectStandardOutput \"$env:TEMP\\\\sv_out.txt\" -RedirectStandardError \"$env:TEMP\\\\sv_err.txt\"; Start-Sleep 2; $proc.HasExited; Get-Content \"$env:TEMP\\\\sv_out.txt\"; Get-Content \"$env:TEMP\\\\sv_err.txt\"; if \\(-not $proc.HasExited\\) { $proc.Kill\\(\\) })",
+      "PowerShell(Get-Content \"$env:TEMP\\\\sv_out.txt\"; Get-Content \"$env:TEMP\\\\sv_err.txt\")",
+      "Bash(timeout 3 node server.js)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\review-package\" 24dbf74 HEAD)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\task-brief\" \"docs/superpowers/plans/2026-07-23-estimatron.md\" 5)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\review-package\" 958c044 HEAD)",
+      "Bash(bash \"C:\\\\Users\\\\surote.gaide\\\\.claude\\\\plugins\\\\superpowers\\\\skills\\\\subagent-driven-development\\\\scripts\\\\task-brief\" \"docs/superpowers/plans/2026-07-23-estimatron.md\" 6)",
+      "Bash(timeout 5 node \"C:\\\\Users\\\\surote.gaide\\\\Desktop\\\\estimatron\\\\server.js\")"
+    ]
+  }
+}

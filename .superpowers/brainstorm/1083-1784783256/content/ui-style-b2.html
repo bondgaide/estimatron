@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estimatron – Style B (Accenture Purple)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0a0b0f;
+      color: #e2e8f0;
+      padding: 32px 24px 48px;
+    }
+
+    h1 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #f1f5f9; }
+    .subtitle { font-size: 13px; color: #64748b; margin-bottom: 32px; }
+
+    /* ── App mockup wrapper ── */
+    .app-frame {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #0f1117;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #1e2130;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(161,0,255,0.08);
+    }
+
+    /* ── Header ── */
+    .app-header {
+      background: #0f1117;
+      padding: 18px 24px;
+      border-bottom: 1px solid #1e2130;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.8px;
+    }
+    .logo span { color: #A100FF; }
+    .logo-dot {
+      width: 8px; height: 8px;
+      background: #A100FF;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #A100FF;
+      flex-shrink: 0;
+    }
+    .tagline {
+      font-size: 12px;
+      color: #475569;
+      margin-left: auto;
+    }
+
+    /* ── Two-panel layout ── */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      min-height: 520px;
+    }
+
+    /* ── Left: Input panel ── */
+    .input-panel {
+      padding: 24px;
+      border-right: 1px solid #1e2130;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .panel-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #475569;
+      margin-bottom: 2px;
+    }
+    .textarea {
+      background: #141720;
+      border: 1.5px solid #252a38;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px;
+      color: #94a3b8;
+      min-height: 120px;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      transition: border-color 0.15s;
+    }
+    .textarea:focus { border-color: #A100FF; }
+    .textarea::placeholder { color: #374151; }
+
+    .upload-zone {
+      border: 1.5px dashed #3b1f5e;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      background: #110d1a;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .upload-zone:hover { border-color: #A100FF; background: #150d22; }
+    .upload-icon { font-size: 20px; margin-bottom: 4px; }
+    .upload-text { font-size: 11px; color: #7c3aed; font-weight: 500; }
+    .upload-sub { font-size: 10px; color: #374151; margin-top: 2px; }
+
+    .thumbs {
+      display: flex;
+      gap: 8px;
+    }
+    .thumb {
+      width: 44px; height: 44px;
+      background: #1a1030;
+      border-radius: 7px;
+      border: 1px solid #3b1f5e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      position: relative;
+    }
+    .thumb .x {
+      position: absolute;
+      top: -5px; right: -5px;
+      width: 14px; height: 14px;
+      background: #374151;
+      border-radius: 50%;
+      font-size: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+
+    .btn-generate {
+      background: #A100FF;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: auto;
+      box-shadow: 0 4px 20px rgba(161,0,255,0.35);
+      letter-spacing: 0.2px;
+      transition: box-shadow 0.15s;
+    }
+    .btn-generate:hover { box-shadow: 0 6px 28px rgba(161,0,255,0.5); }
+
+    /* ── Right: Estimate panel ── */
+    .estimate-panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .estimate-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1e2130;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .estimate-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+    .export-btns { display: flex; gap: 8px; }
+    .btn-sm {
+      background: #1a1f2e;
+      border: 1px solid #2d3548;
+      color: #94a3b8;
+      border-radius: 7px;
+      padding: 5px 11px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-sm:hover { border-color: #A100FF; color: #c084fc; }
+
+    .estimate-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    /* ── Group ── */
+    .group { margin-bottom: 20px; }
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .group-name {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: #A100FF;
+    }
+    .group-subtotal {
+      font-size: 10px;
+      color: #475569;
+      margin-left: auto;
+    }
+    .group-line {
+      flex: 1;
+      height: 1px;
+      background: #1e1030;
+    }
+
+    /* ── Task row ── */
+    .task-row {
+      background: #141720;
+      border: 1px solid #1e2130;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .task-row:hover { border-color: #2d2040; }
+
+    .task-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+    }
+    .task-name {
+      flex: 1;
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+    .complexity-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .badge-high { background: #2d0a3e; color: #c084fc; border: 1px solid #6b21a8; }
+    .badge-med  { background: #1c1a30; color: #818cf8; border: 1px solid #3730a3; }
+    .badge-low  { background: #0f2210; color: #4ade80; border: 1px solid #166534; }
+
+    .md-input {
+      width: 42px;
+      background: #0f1117;
+      border: 1px solid #2d3548;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #A100FF;
+      padding: 4px 6px;
+      outline: none;
+      transition: border-color 0.15s;
+      flex-shrink: 0;
+    }
+    .md-input:focus { border-color: #A100FF; box-shadow: 0 0 0 2px rgba(161,0,255,0.2); }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      color: #374151;
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0 2px;
+      flex-shrink: 0;
+      transition: color 0.12s;
+    }
+    .task-row.open .expand-btn { color: #A100FF; }
+
+    /* ── Description box (expanded) ── */
+    .task-desc {
+      display: none;
+      padding: 10px 12px 12px 12px;
+      border-top: 1px solid #1a1020;
+      background: #0f0d16;
+    }
+    .task-row.open .task-desc { display: block; }
+    .desc-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #6b21a8;
+      margin-bottom: 5px;
+    }
+    .desc-text {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.65;
+    }
+    .desc-text strong { color: #94a3b8; }
+
+    /* ── Grand total ── */
+    .total-bar {
+      padding: 14px 20px;
+      border-top: 1px solid #1e2130;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      background: #0f1117;
+    }
+    .total-label { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+    .total-value { font-size: 22px; font-weight: 900; color: #A100FF; letter-spacing: -0.5px; }
+    .total-unit { font-size: 12px; color: #475569; }
+
+    /* ── Legend note ── */
+    .legend {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #374151;
+    }
+    .legend span { margin: 0 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>Estimatron — Style B with Accenture Purple</h1>
+  <p class="subtitle">Complex tasks have an expandable description panel. Click the ▸ arrow on "Image Upload Handler" or "Authentication & RBAC" to see it in action.</p>
+
+  <div class="app-frame">
+
+    <!-- Header -->
+    <div class="app-header">
+      <div class="logo-dot"></div>
+      <span class="logo">Estimatron<span>.</span></span>
+      <span class="tagline">AI-powered manday estimation</span>
+    </div>
+
+    <!-- Panels -->
+    <div class="panels">
+
+      <!-- LEFT: Input -->
+      <div class="input-panel">
+        <div>
+          <div class="panel-label">Requirements</div>
+          <textarea class="textarea" placeholder="Paste feature description, user stories, or acceptance criteria here…&#10;&#10;E.g. &quot;Build a login screen with email/password auth, social login (Google), and a remember-me option…&quot;"></textarea>
+        </div>
+
+        <div>
+          <div class="panel-label">Wireframes / Screens (optional)</div>
+          <div class="upload-zone">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">Drop images here or click to browse</div>
+            <div class="upload-sub">PNG, JPG, WEBP · Multiple files OK</div>
+          </div>
+          <div class="thumbs" style="margin-top:10px">
+            <div class="thumb">🖼<span class="x">✕</span></div>
+            <div class="thumb">🖼<span class="x">✕</span></div>
+          </div>
+        </div>
+
+        <button class="btn-generate">⚡ Generate Estimate</button>
+      </div>
+
+      <!-- RIGHT: Estimate sheet -->
+      <div class="estimate-panel">
+        <div class="estimate-header">
+          <span class="estimate-title">Estimate Sheet</span>
+          <div class="export-btns">
+            <button class="btn-sm">📋 Copy</button>
+            <button class="btn-sm">⬇ CSV</button>
+          </div>
+        </div>
+
+        <div class="estimate-body">
+
+          <!-- Frontend -->
+          <div class="group">
+            <div class="group-header">
+              <span class="group-name">Frontend</span>
+              <div class="group-line"></div>
+              <span class="group-subtotal">4.5 md</span>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Input form & textarea component</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="1.0" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+
+            <div class="task-row open">
+              <div class="task-main">
+                <span class="task-name">Image upload handler</span>
+                <span class="complexity-badge badge-high">Complex</span>
+                <input class="md-input" value="2.0" />
+                <button class="expand-btn" onclick="this.closest('.task-row').classList.toggle('open')">▾</button>
+              </div>
+              <div class="task-desc">
+                <div class="desc-label">Why this is complex</div>
+                <div class="desc-text">
+                  Requires <strong>drag-and-drop + file picker</strong> in parallel, client-side image preview with thumbnail generation, multi-file queue management, and <strong>base64 encoding</strong> before sending to the API. Edge cases include: oversized files (>10MB), unsupported formats, partial upload failures, and paste-from-clipboard support.
+                </div>
+              </div>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Editable estimate sheet table</span>
+                <span class="complexity-badge badge-med">Medium</span>
+                <input class="md-input" value="1.5" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Backend -->
+          <div class="group">
+            <div class="group-header">
+              <span class="group-name">Backend</span>
+              <div class="group-line"></div>
+              <span class="group-subtotal">3.5 md</span>
+            </div>
+
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Express server setup & static serving</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="0.5" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+
+            <div class="task-row open">
+              <div class="task-main">
+                <span class="task-name">Claude API integration & prompt engineering</span>
+                <span class="complexity-badge badge-high">Complex</span>
+                <input class="md-input" value="3.0" />
+                <button class="expand-btn" onclick="this.closest('.task-row').classList.toggle('open')">▾</button>
+              </div>
+              <div class="task-desc">
+                <div class="desc-label">Why this is complex</div>
+                <div class="desc-text">
+                  The system prompt must reliably produce <strong>structured JSON</strong> (grouped tasks with complexity flags and manday estimates) regardless of how vague the input is. Requires multi-turn prompt tuning, <strong>vision API handling</strong> for image inputs, JSON schema validation on the response, and graceful fallback when the model returns malformed output. Streaming response handling adds additional complexity.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Testing -->
+          <div class="group">
+            <div class="group-header">
+              <span class="group-name">Testing</span>
+              <div class="group-line"></div>
+              <span class="group-subtotal">1.5 md</span>
+            </div>
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">API endpoint smoke tests</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="0.5" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">CSV export & clipboard validation</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="0.5" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Cross-browser & responsive checks</span>
+                <span class="complexity-badge badge-med">Medium</span>
+                <input class="md-input" value="0.5" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edge Cases -->
+          <div class="group">
+            <div class="group-header">
+              <span class="group-name">Edge Cases</span>
+              <div class="group-line"></div>
+              <span class="group-subtotal">2.5 md</span>
+            </div>
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">API timeout & error user feedback</span>
+                <span class="complexity-badge badge-med">Medium</span>
+                <input class="md-input" value="1.0" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Empty / very short input handling</span>
+                <span class="complexity-badge badge-low">Low</span>
+                <input class="md-input" value="0.5" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-main">
+                <span class="task-name">Rate limit & large payload handling</span>
+                <span class="complexity-badge badge-med">Medium</span>
+                <input class="md-input" value="1.0" />
+                <button class="expand-btn">▸</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end estimate-body -->
+
+        <!-- Grand total -->
+        <div class="total-bar">
+          <span class="total-label">Grand Total</span>
+          <span class="total-value">12.0</span>
+          <span class="total-unit">mandays</span>
+        </div>
+
+      </div><!-- end estimate-panel -->
+
+    </div><!-- end panels -->
+  </div><!-- end app-frame -->
+
+  <div class="legend">
+    <span>▸ click to expand complex task description</span>
+    &nbsp;·&nbsp;
+    <span>manday cells are editable — grand total updates live</span>
+  </div>
+
+  <script>
+    // Make expand buttons toggle
+    document.querySelectorAll('.expand-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('.task-row');
+        const isOpen = row.classList.toggle('open');
+        btn.textContent = isOpen ? '▾' : '▸';
+      });
+    });
+
+    // Live grand total
+    function recalc() {
+      let total = 0;
+      document.querySelectorAll('.md-input').forEach(inp => {
+        total += parseFloat(inp.value) || 0;
+      });
+      document.querySelector('.total-value').textContent = total.toFixed(1);
+    }
+    document.querySelectorAll('.md-input').forEach(inp => inp.addEventListener('input', recalc));
+  </script>
+
+</body>
+</html>

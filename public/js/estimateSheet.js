@@ -14,6 +14,10 @@ function csvEscape(value) {
     ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+function tsvEscape(val) {
+  return String(val == null ? '' : val).replace(/\t/g, ' ').replace(/\n/g, ' ');
+}
+
 function generateCSV(groups) {
   const rows = ['Group,Subgroup,Task,Complexity,Mandays'];
   for (const g of groups) {
@@ -30,12 +34,30 @@ function generateClipboardText(groups) {
   const rows = ['Group\tSubgroup\tTask\tComplexity\tMandays'];
   for (const g of groups) {
     const push = (label, tasks) =>
-      tasks.forEach(t => rows.push([g.name, label, t.name, t.complexity, t.mandays].join('\t')));
+      tasks.forEach(t => rows.push([g.name, label, t.name, t.complexity, t.mandays].map(tsvEscape).join('\t')));
     push('Tasks',      g.tasks);
     push('Edge Cases', g.edgeCases);
     push('Testing',    g.testing);
   }
   return rows.join('\n');
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────
+
+function syncEditsToEstimate() {
+  if (!window._currentEstimate) return;
+  const inputs = Array.from(document.querySelectorAll('.md-input'));
+  let i = 0;
+  window._currentEstimate.groups.forEach(group => {
+    ['tasks', 'edgeCases', 'testing'].forEach(sub => {
+      group[sub].forEach(task => {
+        if (inputs[i]) {
+          task.mandays = parseFloat(inputs[i].value) || task.mandays;
+          i++;
+        }
+      });
+    });
+  });
 }
 
 // ── DOM rendering ────────────────────────────────────────────────────
@@ -53,6 +75,16 @@ function recalcTotal() {
   });
   const el = document.getElementById('grandTotal');
   if (el) el.textContent = (Math.round(total * 10) / 10).toFixed(1);
+
+  // Update per-group subtotals
+  document.querySelectorAll('#estimateBody .group').forEach(groupEl => {
+    let subtotal = 0;
+    groupEl.querySelectorAll('.md-input').forEach(inp => {
+      subtotal += parseFloat(inp.value) || 0;
+    });
+    const span = groupEl.querySelector('.group-subtotal');
+    if (span) span.textContent = (Math.round(subtotal * 10) / 10).toFixed(1) + ' md';
+  });
 }
 
 function buildTaskRow(task) {

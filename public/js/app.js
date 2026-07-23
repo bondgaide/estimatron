@@ -170,6 +170,7 @@ if (typeof document !== 'undefined') {
   // ── Export CSV ─────────────────────────────────────────────────────
   exportCsvBtn.addEventListener('click', () => {
     if (!window._currentEstimate) return;
+    syncEditsToEstimate();
     const csv  = generateCSV(window._currentEstimate.groups);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
@@ -184,6 +185,7 @@ if (typeof document !== 'undefined') {
   // ── Copy to clipboard ──────────────────────────────────────────────
   copyBtn.addEventListener('click', async () => {
     if (!window._currentEstimate) return;
+    syncEditsToEstimate();
     try {
       await navigator.clipboard.writeText(generateClipboardText(window._currentEstimate.groups));
       showToast('Copied to clipboard', 'success');

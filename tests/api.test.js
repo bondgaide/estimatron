@@ -1,8 +1,8 @@
-jest.mock('@anthropic-ai/sdk');
+jest.mock('@google/generative-ai');
 
-const Anthropic = require('@anthropic-ai/sdk');
-const request   = require('supertest');
-const app       = require('../server');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const request                = require('supertest');
+const app                    = require('../server');
 
 const validPayload = {
   title: 'Login Screen',
@@ -23,7 +23,9 @@ const validPayload = {
 };
 
 function makeClient(mockFn) {
-  Anthropic.mockImplementation(() => ({ messages: { create: mockFn } }));
+  GoogleGenerativeAI.mockImplementation(() => ({
+    getGenerativeModel: () => ({ generateContent: mockFn }),
+  }));
 }
 
 describe('POST /api/estimate — input validation', () => {
@@ -48,7 +50,7 @@ describe('POST /api/estimate — input validation', () => {
 
 describe('POST /api/estimate — Claude integration', () => {
   test('returns structured estimate on valid Claude response', async () => {
-    makeClient(jest.fn().mockResolvedValue({ content: [{ text: JSON.stringify(validPayload) }] }));
+    makeClient(jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(validPayload) } }));
     const res = await request(app)
       .post('/api/estimate')
       .send({ requirements: 'build a login screen', platform: 'web' });
@@ -59,8 +61,8 @@ describe('POST /api/estimate — Claude integration', () => {
 
   test('retries once on malformed JSON, succeeds on second attempt', async () => {
     const fn = jest.fn()
-      .mockResolvedValueOnce({ content: [{ text: 'not json' }] })
-      .mockResolvedValueOnce({ content: [{ text: JSON.stringify(validPayload) }] });
+      .mockResolvedValueOnce({ response: { text: () => 'not json' } })
+      .mockResolvedValueOnce({ response: { text: () => JSON.stringify(validPayload) } });
     makeClient(fn);
     const res = await request(app)
       .post('/api/estimate')
@@ -70,7 +72,7 @@ describe('POST /api/estimate — Claude integration', () => {
   });
 
   test('returns 502 when both attempts return malformed JSON', async () => {
-    makeClient(jest.fn().mockResolvedValue({ content: [{ text: 'not json' }] }));
+    makeClient(jest.fn().mockResolvedValue({ response: { text: () => 'not json' } }));
     const res = await request(app)
       .post('/api/estimate')
       .send({ requirements: 'build a login screen', platform: 'web' });
@@ -87,7 +89,7 @@ describe('POST /api/estimate — Claude integration', () => {
   });
 
   test('accepts images as {data, mediaType} objects and returns estimate', async () => {
-    makeClient(jest.fn().mockResolvedValue({ content: [{ text: JSON.stringify(validPayload) }] }));
+    makeClient(jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(validPayload) } }));
     const res = await request(app)
       .post('/api/estimate')
       .send({

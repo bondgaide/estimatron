@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express   = require('express');
 const path      = require('path');
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -68,21 +68,21 @@ function validateSchema(data) {
   return true;
 }
 
-async function callClaude(requirements, platform, images) {
-  const client  = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  const content = [];
-  for (const img of images) {
-    content.push({ type: 'image', source: { type: 'base64', media_type: img.mediaType, data: img.data } });
-  }
-  content.push({ type: 'text', text: `Platform: ${platform}\n\nFeature requirements:\n${requirements}` });
-
-  const response = await client.messages.create({
-    model:      'claude-sonnet-5',
-    max_tokens: 4096,
-    system:     SYSTEM_PROMPT,
-    messages:   [{ role: 'user', content }],
+async function callGemini(requirements, platform, images) {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction: SYSTEM_PROMPT,
   });
-  return response.content[0].text;
+
+  const parts = [];
+  for (const img of images) {
+    parts.push({ inlineData: { mimeType: img.mediaType, data: img.data } });
+  }
+  parts.push({ text: `Platform: ${platform}\n\nFeature requirements:\n${requirements}` });
+
+  const result = await model.generateContent(parts);
+  return result.response.text();
 }
 
 app.post('/api/estimate', async (req, res) => {
@@ -98,9 +98,9 @@ app.post('/api/estimate', async (req, res) => {
   for (let attempt = 0; attempt <= 1; attempt++) {
     let text;
     try {
-      text = await callClaude(requirements, platform, images);
+      text = await callGemini(requirements, platform, images);
     } catch (err) {
-      console.error('Claude API error:', err.message);
+      console.error('Gemini API error:', err.message);
       return res.status(502).json({ error: 'Generation failed — please try again' });
     }
 

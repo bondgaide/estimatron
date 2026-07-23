@@ -97,7 +97,7 @@ if (typeof document !== 'undefined') {
       if (err) { showToast(err); continue; }
       try {
         const encoded = await encodeImageToBase64(file);
-        uploadedImages.push(encoded.data);
+        uploadedImages.push(encoded);
       } catch {
         showToast(`Failed to read ${file.name}`);
       }

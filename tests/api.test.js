@@ -85,4 +85,18 @@ describe('POST /api/estimate — Claude integration', () => {
       .send({ requirements: 'build a login screen', platform: 'web' });
     expect(res.status).toBe(502);
   });
+
+  test('accepts images as {data, mediaType} objects and returns estimate', async () => {
+    makeClient(jest.fn().mockResolvedValue({ content: [{ text: JSON.stringify(validPayload) }] }));
+    const res = await request(app)
+      .post('/api/estimate')
+      .send({
+        requirements: 'build a login screen',
+        platform:     'web',
+        images:       [{ data: 'aGVsbG8=', mediaType: 'image/jpeg' }],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body.title).toBe('Login Screen');
+    expect(res.body.groups).toHaveLength(2);
+  });
 });

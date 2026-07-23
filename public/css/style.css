@@ -69,12 +69,12 @@ html, body { height: 100%; font-family: 'Inter', system-ui, -apple-system, sans-
 }
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--accent); background: #150f22; }
 .upload-icon { font-size: 24px; margin-bottom: 6px; }
-.upload-text { font-size: 13px; color: #9333ea; font-weight: 600; }
+.upload-text { font-size: 13px; color: var(--accent); font-weight: 600; }
 .upload-sub { font-size: 11px; color: var(--text4); margin-top: 4px; }
 
 .thumb-row { display: flex; gap: 8px; flex-wrap: wrap; min-height: 0; }
 .thumb { width: 50px; height: 50px; background: #1a1030; border-radius: 8px; border: 1px solid #3b1f5e; display: flex; align-items: center; justify-content: center; font-size: 22px; position: relative; }
-.thumb .x { position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; background: #374151; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; color: #94a3b8; cursor: pointer; line-height: 1; }
+.thumb .x { position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; background: #374151; border-radius: 50%; font-size: 9px; display: flex; align-items: center; justify-content: center; color: var(--text3); cursor: pointer; line-height: 1; }
 
 .btn-generate {
   background: var(--accent); color: white; border: none; border-radius: 10px;
@@ -118,14 +118,14 @@ html, body { height: 100%; font-family: 'Inter', system-ui, -apple-system, sans-
 .complexity-badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
 .badge-low  { background: #0f2210; color: #86efac; border: 1px solid #166534; }
 .badge-med  { background: #1c1a30; color: #a5b4fc; border: 1px solid #4338ca; }
-.badge-high { background: #2d0a3e; color: #d8b4fe; border: 1px solid #7e22ce; }
+.badge-complex { background: #2d0a3e; color: #d8b4fe; border: 1px solid #7e22ce; }
 
 .md-input { width: 52px; background: #0f1117; border: 1px solid var(--border2); border-radius: 6px; text-align: center; font-size: 14px; font-weight: 700; color: var(--accent); padding: 5px 6px; outline: none; transition: border-color 0.15s; flex-shrink: 0; }
 .md-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
 .md-unit { font-size: 12px; color: var(--text3); flex-shrink: 0; padding-top: 6px; }
 
 .task-desc { padding: 10px 16px 14px; border-top: 1px solid #1a1020; background: #0f0d16; }
-.desc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #7c3aed; margin-bottom: 6px; }
+.desc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--accent); margin-bottom: 6px; }
 .desc-text { font-size: 13px; color: var(--text3); line-height: 1.75; }
 
 /* ── Grand total ── */

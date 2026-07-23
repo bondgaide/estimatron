@@ -39,7 +39,7 @@ Paste your feature requirements (or upload wireframe screenshots), pick a platfo
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/estimatron.git
+git clone https://github.com/bondgaide/estimatron.git
 cd estimatron
 
 # 2. Install dependencies

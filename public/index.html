@@ -2,9 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estimatron</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <h1>Estimatron</h1>
+<div class="app">
+
+  <header class="app-header">
+    <div class="logo-dot"></div>
+    <span class="logo">Estimatron<span>.</span></span>
+    <span class="tagline">AI-powered manday estimation</span>
+  </header>
+
+  <main class="main" id="main">
+
+    <div class="input-card">
+      <div class="section-label">Requirements</div>
+      <div class="input-cols">
+
+        <div class="input-left">
+          <div class="platform-row">
+            <span class="platform-label">Platform</span>
+            <select class="platform-select" id="platformSelect">
+              <option value="web">Web Application</option>
+              <option value="ios">iOS (Native)</option>
+              <option value="android">Android (Native)</option>
+              <option value="cross">Cross-platform Mobile (React Native / Flutter)</option>
+              <option value="api">API / Backend only</option>
+            </select>
+          </div>
+          <textarea
+            class="textarea"
+            id="requirements"
+            placeholder="Paste feature description, user stories, or acceptance criteria here…&#10;&#10;E.g. &quot;Build a login screen with email/password, social login (Google), and a remember-me option…&quot;"
+          ></textarea>
+        </div>
+
+        <div class="upload-col">
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">Drop wireframes or screens</div>
+            <div class="upload-sub">PNG · JPG · WEBP · Multiple files OK</div>
+          </div>
+          <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden />
+          <div class="thumb-row" id="thumbRow"></div>
+          <button class="btn-generate" id="generateBtn" disabled>Generate Estimation</button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="estimate-section" id="estimateSection">
+      <div class="section-label">Estimate Sheet</div>
+      <div class="estimate-card">
+        <div class="estimate-toolbar">
+          <span class="estimate-title" id="estimateTitle">—</span>
+          <span class="platform-chip" id="platformChip"></span>
+          <button class="regen-btn" id="regenBtn">↺ Re-generate</button>
+          <div class="export-btns">
+            <button class="btn-sm" id="copyBtn">Copy</button>
+            <button class="btn-sm" id="exportCsvBtn">Export CSV</button>
+          </div>
+        </div>
+        <div class="estimate-body" id="estimateBody"></div>
+        <div class="total-bar">
+          <span class="total-label">Grand Total</span>
+          <span class="total-value" id="grandTotal">0</span>
+          <span class="total-unit">mandays</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toastContainer"></div>
+
+<script src="/js/estimateSheet.js"></script>
+<script src="/js/app.js"></script>
 </body>
 </html>

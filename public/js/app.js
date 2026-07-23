@@ -49,7 +49,7 @@ if (typeof document !== 'undefined') {
   const copyBtn         = document.getElementById('copyBtn');
 
   // ── Toast ──────────────────────────────────────────────────────────
-  function showToast(message, type = 'error') {
+  window.showToast = function showToast(message, type = 'error') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -60,7 +60,7 @@ if (typeof document !== 'undefined') {
       toast.classList.remove('visible');
       setTimeout(() => toast.remove(), 300);
     }, 4000);
-  }
+  };
 
   // ── Button state ───────────────────────────────────────────────────
   function updateButtonState() {
@@ -96,7 +96,8 @@ if (typeof document !== 'undefined') {
       const err = validateFile(file);
       if (err) { showToast(err); continue; }
       try {
-        uploadedImages.push(await encodeImageToBase64(file));
+        const encoded = await encodeImageToBase64(file);
+        uploadedImages.push(encoded.data);
       } catch {
         showToast(`Failed to read ${file.name}`);
       }
@@ -141,7 +142,7 @@ if (typeof document !== 'undefined') {
       }
 
       window._currentEstimate    = data;
-      estimateTitleEl.textContent = data.title;
+      estimateTitleEl.textContent = data.title || 'Untitled Estimate';
       platformChipEl.textContent  = PLATFORM_LABELS[platform];
       if (window.renderEstimate) window.renderEstimate(data);
       estimateSection.classList.add('visible');
@@ -194,4 +195,4 @@ if (typeof document !== 'undefined') {
 } // end DOM guard
 
 // ── Exports for Jest ──────────────────────────────────────────────────
-if (typeof module !== 'undefined') module.exports = { validateFile, MAX_FILE_SIZE, ALLOWED_TYPES };
+if (typeof module !== 'undefined') module.exports = { validateFile, encodeImageToBase64, MAX_FILE_SIZE, ALLOWED_TYPES };

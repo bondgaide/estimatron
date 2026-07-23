@@ -1,4 +1,4 @@
-const { validateFile, MAX_FILE_SIZE, ALLOWED_TYPES } = require('../public/js/app');
+const { validateFile, encodeImageToBase64, MAX_FILE_SIZE, ALLOWED_TYPES } = require('../public/js/app');
 
 describe('validateFile', () => {
   function makeFile(name, type, size) {
@@ -46,5 +46,36 @@ describe('validateFile', () => {
   test('accepts a file exactly at 10 MB', () => {
     const file = makeFile('exact.png', 'image/png', MAX_FILE_SIZE);
     expect(validateFile(file)).toBeNull();
+  });
+});
+
+describe('encodeImageToBase64', () => {
+  test('strips data-URL prefix and returns plain base64 string', async () => {
+    const file = { type: 'image/png' };
+
+    // Mock FileReader
+    global.FileReader = jest.fn(() => ({
+      readAsDataURL: jest.fn(function() {
+        this.result = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+        this.onload();
+      }),
+      result: null,
+      onload: null,
+      onerror: null,
+    }));
+
+    const result = await encodeImageToBase64(file);
+
+    // Verify it returns an object with data and mediaType
+    expect(result).toHaveProperty('data');
+    expect(result).toHaveProperty('mediaType');
+
+    // Verify the data is the base64 string without the data-URL prefix
+    expect(result.data).toBe('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+    expect(result.mediaType).toBe('image/png');
+
+    // Verify it does NOT include the 'data:image/png;base64,' prefix
+    expect(result.data).not.toContain('data:');
+    expect(result.data).not.toContain('base64,');
   });
 });

@@ -115,10 +115,12 @@ function buildGroup(group) {
   const header = document.createElement('div');
   header.className = 'group-header';
   header.innerHTML = `
-    <span class="group-name">${group.name}</span>
+    <span class="group-name"></span>
     <div class="group-line"></div>
-    <span class="group-subtotal">${groupSubtotal(group).toFixed(1)} md</span>
+    <span class="group-subtotal"></span>
   `;
+  header.querySelector('.group-name').textContent = group.name;
+  header.querySelector('.group-subtotal').textContent = groupSubtotal(group).toFixed(1) + ' md';
   el.appendChild(header);
 
   group.tasks.forEach(t => el.appendChild(buildTaskRow(t)));

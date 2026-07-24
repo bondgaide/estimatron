@@ -63,7 +63,7 @@ if (typeof document !== 'undefined') {
     setTimeout(() => {
       toast.classList.remove('visible');
       setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 8000);
   };
 
   // ── Button state ───────────────────────────────────────────────────

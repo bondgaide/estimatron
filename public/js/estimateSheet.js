@@ -228,6 +228,11 @@ function buildAddForm(taskArr, containerEl, addBtn) {
   return form;
 }
 
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
 function groupDisplayName(name) {
   if (name === 'iOS') return 'iOS (Native)';
   if (name === 'Android') return 'Android (Native)';
@@ -263,11 +268,14 @@ function buildTaskRow(task, taskArr) {
   const main = document.createElement('div');
   main.className = 'task-main';
 
-  const nameInput = document.createElement('input');
-  nameInput.type = 'text';
+  const nameInput = document.createElement('textarea');
   nameInput.className = 'task-name-edit';
+  nameInput.rows = 1;
   nameInput.value = task.name;
-  nameInput.addEventListener('input', () => { row._taskRef.name = nameInput.value; });
+  nameInput.addEventListener('input', () => {
+    row._taskRef.name = nameInput.value;
+    autoResize(nameInput);
+  });
 
   const badgeGroup = document.createElement('div');
   badgeGroup.className = 'badge-group';
@@ -392,6 +400,7 @@ function renderEstimate(data) {
   body.innerHTML = '';
   data.groups.forEach(g => body.appendChild(buildGroup(g, multi, multi)));
   recalcTotal();
+  requestAnimationFrame(() => body.querySelectorAll('.task-name-edit').forEach(autoResize));
 }
 
 if (typeof window !== 'undefined') {

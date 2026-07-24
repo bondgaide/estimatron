@@ -15,7 +15,7 @@ const validPayload = {
     },
     {
       name: 'Backend',
-      tasks:     [{ name: 'Auth endpoint',   complexity: 'Medium', mandays: 1.5, notes: 'JWT handling' }],
+      tasks:     [{ name: 'Auth endpoint',   complexity: 'Medium', mandays: 1.5, notes: ['JWT requires token rotation on each refresh', 'Must handle concurrent refresh races'] }],
       edgeCases: [],
       testing:   [],
     },
@@ -100,5 +100,57 @@ describe('POST /api/estimate — Claude integration', () => {
     expect(res.status).toBe(200);
     expect(res.body.title).toBe('Login Screen');
     expect(res.body.groups).toHaveLength(2);
+  });
+});
+
+describe('POST /api/estimate — INCLUDES params', () => {
+  test('accepts includeTesting: false and returns 200', async () => {
+    const noTestingPayload = {
+      ...validPayload,
+      groups: validPayload.groups.map(g => ({ ...g, testing: [] })),
+    };
+    makeClient(jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(noTestingPayload) } }));
+    const res = await request(app)
+      .post('/api/estimate')
+      .send({ requirements: 'login screen', platform: 'web', includeTesting: false });
+    expect(res.status).toBe(200);
+  });
+
+  test('accepts includeBackend: false and returns 200', async () => {
+    const noBackendPayload = {
+      title: 'Login Screen',
+      groups: [validPayload.groups[0]],
+    };
+    makeClient(jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(noBackendPayload) } }));
+    const res = await request(app)
+      .post('/api/estimate')
+      .send({ requirements: 'login screen', platform: 'web', includeBackend: false });
+    expect(res.status).toBe(200);
+  });
+});
+
+describe('validateSchema', () => {
+  const { validateSchema } = require('../server');
+
+  test('accepts notes as null', () => {
+    expect(validateSchema(validPayload)).toBe(true);
+  });
+
+  test('rejects notes as a plain string (breaking change from v1)', () => {
+    const bad = JSON.parse(JSON.stringify(validPayload));
+    bad.groups[1].tasks[0].notes = 'plain string';
+    expect(validateSchema(bad)).toBe(false);
+  });
+
+  test('accepts notes as a non-empty string array', () => {
+    const good = JSON.parse(JSON.stringify(validPayload));
+    good.groups[1].tasks[0].notes = ['first bullet', 'second bullet'];
+    expect(validateSchema(good)).toBe(true);
+  });
+
+  test('rejects notes as an empty array', () => {
+    const bad = JSON.parse(JSON.stringify(validPayload));
+    bad.groups[1].tasks[0].notes = [];
+    expect(validateSchema(bad)).toBe(false);
   });
 });

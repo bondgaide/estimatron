@@ -25,6 +25,15 @@ For each group, break the work into three subgroups:
 2. edgeCases — error handling, boundary conditions, validation, unusual states
 3. testing — unit tests, integration tests, manual test plans
 
+EXHAUSTIVE EDGE CASE COVERAGE — you MUST include separate tasks for ALL of the following categories within edgeCases:
+- Error / failure states: wrong credentials, expired tokens, network timeout, server 5xx responses
+- Validation: client-side field validation (format, required, length) AND server-side validation errors
+- Empty states: what the UI shows when there is no data to display
+- Loading / skeleton states: any async operation that needs a loading indicator
+- Security edge cases: rate limiting, brute-force protection, input sanitisation
+- Accessibility: keyboard navigation, screen reader labels (flag as Low complexity when straightforward)
+Ask yourself: what happens when it fails, when input is invalid, when the server is slow, and when the user has no data? Each of these must appear as a task.
+
 For each task item:
 - name: specific and actionable (e.g. "POST /auth/login endpoint" not "implement auth")
 - complexity: exactly one of "Low", "Medium", or "Complex"
@@ -32,7 +41,7 @@ For each task item:
   - Medium: non-obvious decisions, cross-system coordination, 1–2 days
   - Complex: significant unknowns, tricky integrations, or many interacting edge cases, 2+ days
 - mandays: estimate in 0.5 increments, minimum 0.5
-- notes: for Medium or Complex tasks, 1–3 sentences on WHY it is non-trivial; null for Low tasks
+- notes: for Medium or Complex tasks, return a JSON array of 2–4 strings — each string is one specific bullet point explaining WHY this task is non-trivial or what exactly must be handled. For Low tasks, return null.
 
 Return ONLY valid JSON — no markdown fences, no preamble. Your entire response must be parseable by JSON.parse().
 
@@ -42,9 +51,9 @@ Schema:
   "groups": [
     {
       "name": "string",
-      "tasks":     [{ "name": "string", "complexity": "Low|Medium|Complex", "mandays": 0.5, "notes": "string|null" }],
-      "edgeCases": [{ "name": "string", "complexity": "Low|Medium|Complex", "mandays": 0.5, "notes": "string|null" }],
-      "testing":   [{ "name": "string", "complexity": "Low|Medium|Complex", "mandays": 0.5, "notes": "string|null" }]
+      "tasks":     [{ "name": "string", "complexity": "Low|Medium|Complex", "mandays": 0.5, "notes": ["string", ...] | null }],
+      "edgeCases": [{ "name": "string", "complexity": "Low|Medium|Complex", "mandays": 0.5, "notes": ["string", ...] | null }],
+      "testing":   [{ "name": "string", "complexity": "Low|Medium|Complex", "mandays": 0.5, "notes": ["string", ...] | null }]
     }
   ]
 }`;
@@ -62,13 +71,16 @@ function validateSchema(data) {
       if (typeof task.name !== 'string')                          return false;
       if (!['Low', 'Medium', 'Complex'].includes(task.complexity)) return false;
       if (typeof task.mandays !== 'number' || task.mandays < 0.5) return false;
-      if (task.notes !== null && typeof task.notes !== 'string') return false;
+      if (task.notes !== null) {
+        if (!Array.isArray(task.notes) || task.notes.length === 0) return false;
+        if (!task.notes.every(n => typeof n === 'string' && n.trim().length > 0)) return false;
+      }
     }
   }
   return true;
 }
 
-async function callGemini(requirements, platform, images) {
+async function callGemini(requirements, platform, images, includeTesting, includeBackend) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.5-flash',
@@ -79,14 +91,19 @@ async function callGemini(requirements, platform, images) {
   for (const img of images) {
     parts.push({ inlineData: { mimeType: img.mediaType, data: img.data } });
   }
-  parts.push({ text: `Platform: ${platform}\n\nFeature requirements:\n${requirements}` });
+
+  let instructions = '';
+  if (!includeTesting) instructions += '\nIMPORTANT: Return an empty array `[]` for the "testing" field on every group.\n';
+  if (!includeBackend) instructions += '\nIMPORTANT: Do NOT include a group named "Backend" in your response.\n';
+
+  parts.push({ text: `Platform: ${platform}\n\nFeature requirements:\n${requirements}${instructions}` });
 
   const result = await model.generateContent(parts);
   return result.response.text();
 }
 
 app.post('/api/estimate', async (req, res) => {
-  const { requirements, platform, images = [] } = req.body;
+  const { requirements, platform, images = [], includeTesting = true, includeBackend = true } = req.body;
 
   if (!requirements || !requirements.trim()) {
     return res.status(400).json({ error: 'requirements is required' });
@@ -98,7 +115,7 @@ app.post('/api/estimate', async (req, res) => {
   for (let attempt = 0; attempt <= 1; attempt++) {
     let text;
     try {
-      text = await callGemini(requirements, platform, images);
+      text = await callGemini(requirements, platform, images, includeTesting, includeBackend);
     } catch (err) {
       console.error('Gemini API error:', err.message);
       return res.status(502).json({ error: 'Generation failed — please try again' });

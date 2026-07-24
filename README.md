@@ -11,9 +11,13 @@ Paste your feature requirements (or upload wireframe screenshots), pick a platfo
 - **AI task breakdown** — Gemini analyses your requirements and splits work into Frontend, Backend, iOS, Android groups depending on your platform
 - **Edge cases & testing included** — every group comes with edge case handling and testing tasks, not just core implementation
 - **Complexity badges** — each task is rated Low, Medium, or Complex with an explanation for non-trivial work
-- **Inline editing** — adjust any manday value; the grand total and group subtotals update live
-- **Image upload** — attach wireframes or UI screenshots for more accurate estimates
+- **Includes toggles** — opt out of Testing and/or Backend groups before generating; Backend is auto-enabled and locked for API-only platforms
+- **Tech Stack field** — optional tag input to specify your technologies (React, Node.js, PostgreSQL, etc.); categories are filtered by platform and Backend toggle, and passed to the AI for more targeted estimates
+- **Inline editing** — rename tasks, change complexity, adjust manday values; grand total and group subtotals update live
+- **Add / remove tasks** — manually insert new tasks or delete generated ones directly in the estimate sheet
+- **Image upload** — attach wireframes or UI screenshots for more accurate estimates (PNG, JPG, WEBP — max 10 MB each)
 - **Export** — download as CSV or copy tab-separated text straight into Excel / Google Sheets
+- **Light / dark mode** — click the purple dot in the header to toggle; preference is saved across sessions
 
 ---
 
@@ -60,11 +64,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## Usage
 
 1. Select your **platform** (Web, iOS, Android, Cross-platform, or API/Backend only)
-2. Paste your **feature requirements** in the text area
-3. Optionally **upload wireframes** or UI screenshots (PNG, JPG, WEBP — max 10 MB each)
-4. Click **Generate Estimation**
-5. Review the breakdown, adjust manday values as needed
-6. **Export CSV** or **Copy** to paste into your project tracker
+2. Use the **Includes** checkboxes to opt in/out of Testing and Backend groups
+3. Optionally pick your **Tech Stack** — type or search to add technology tags
+4. Paste your **feature requirements** in the text area
+5. Optionally **upload wireframes** or UI screenshots (PNG, JPG, WEBP — max 10 MB each)
+6. Click **Generate Estimation**
+7. Review the breakdown — rename tasks, adjust complexity badges, edit manday values, add or remove tasks
+8. **Export CSV** or **Copy** to paste into your project tracker
 
 ---
 
@@ -78,7 +84,7 @@ estimatron/
 └── public/
     ├── index.html         # Single-page UI
     ├── css/
-    │   └── style.css      # Dark theme design system
+    │   └── style.css      # Dark/light theme design system
     └── js/
         ├── app.js         # Form logic, image upload, API call
         └── estimateSheet.js  # Table rendering, editing, export

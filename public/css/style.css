@@ -302,6 +302,9 @@ body, .app-header, .input-card, .estimate-card { transition: background-color 0.
 .tech-stack-row { display: flex; flex-direction: column; gap: 6px; }
 .tech-stack-header { display: flex; align-items: center; gap: 8px; }
 .tech-stack-header .upload-optional { margin-top: 0; }
+.existing-comp-row { display: flex; flex-direction: column; gap: 6px; }
+.existing-comp-header { display: flex; align-items: center; gap: 8px; }
+.existing-comp-header .upload-optional { margin-top: 0; }
 .tech-stack-label { font-size: 13px; font-weight: 600; color: var(--text3); }
 .tech-chip-area { position: relative; }
 .tech-chip-wrap {

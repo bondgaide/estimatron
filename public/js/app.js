@@ -62,6 +62,7 @@ if (typeof document !== 'undefined') {
 
   let uploadedImages = [];
   let techChips      = [];
+  let existingChips  = [];
 
   const platformSelect  = document.getElementById('platformSelect');
   const requirementsEl  = document.getElementById('requirements');
@@ -86,7 +87,10 @@ if (typeof document !== 'undefined') {
   const techChipWrap  = document.getElementById('techChipWrap');
   const techChipInput = document.getElementById('techChipInput');
   const techDropdown  = document.getElementById('techDropdown');
-  const techChipsEl   = document.getElementById('techChips');
+  const techChipsEl         = document.getElementById('techChips');
+  const existingCompWrap    = document.getElementById('existingCompWrap');
+  const existingCompInput   = document.getElementById('existingCompInput');
+  const existingCompChipsEl = document.getElementById('existingCompChips');
 
   // ── Toast ──────────────────────────────────────────────────────────
   window.showToast = function showToast(message, type = 'error') {
@@ -129,6 +133,7 @@ if (typeof document !== 'undefined') {
     const isLight = document.documentElement.classList.toggle('light');
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
     renderTechChips();
+    renderExistingChips();
     if (techDropdown.classList.contains('open')) renderTechDropdown();
   });
 
@@ -167,6 +172,28 @@ if (typeof document !== 'undefined') {
       });
       chip.appendChild(rm);
       techChipsEl.appendChild(chip);
+    });
+  }
+
+  function renderExistingChips() {
+    existingCompChipsEl.innerHTML = '';
+    existingChips.forEach((chip, i) => {
+      const s = getCatStyle('Custom');
+      const el = document.createElement('span');
+      el.className = 'tech-chip';
+      el.style.cssText = `background:${s.bg};border-color:${s.border};color:${s.text};`;
+      const label = document.createElement('span');
+      label.textContent = chip.label;
+      const rm = document.createElement('span');
+      rm.className = 'tech-chip-remove';
+      rm.innerHTML = '&times;';
+      rm.addEventListener('click', () => {
+        existingChips.splice(i, 1);
+        renderExistingChips();
+      });
+      el.appendChild(label);
+      el.appendChild(rm);
+      existingCompChipsEl.appendChild(el);
     });
   }
 
@@ -259,6 +286,24 @@ if (typeof document !== 'undefined') {
       techChips.pop();
       renderTechChips();
       if (techDropdown.classList.contains('open')) renderTechDropdown();
+    }
+  });
+
+  existingCompWrap.addEventListener('click', () => existingCompInput.focus());
+  existingCompInput.addEventListener('focus', () => existingCompWrap.classList.add('focused'));
+  existingCompInput.addEventListener('blur', () => existingCompWrap.classList.remove('focused'));
+  existingCompInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const label = existingCompInput.value.replace(/,$/, '').trim();
+      if (label && !existingChips.some(c => c.label.toLowerCase() === label.toLowerCase())) {
+        existingChips.push({ label });
+        renderExistingChips();
+        existingCompInput.value = '';
+      }
+    } else if (e.key === 'Backspace' && !existingCompInput.value && existingChips.length) {
+      existingChips.pop();
+      renderExistingChips();
     }
   });
 
@@ -379,7 +424,7 @@ if (typeof document !== 'undefined') {
       const res  = await fetch('/api/estimate', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend, techStack: techChips.map(c => c.label), includeGa, includeAiAssist }),
+        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend, techStack: techChips.map(c => c.label), includeGa, includeAiAssist, existingComponents: existingChips.map(c => c.label) }),
       });
       const data = await res.json();
 

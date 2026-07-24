@@ -25,6 +25,14 @@ For each group, break the work into three subgroups:
 2. edgeCases — error handling, boundary conditions, validation, unusual states
 3. testing — unit tests, integration tests, manual test plans
 
+COMPREHENSIVE CORE TASK COVERAGE — For the "tasks" subgroup, you MUST include every discrete component, screen, interaction, and API endpoint the feature requires. Ask: what are all the UI components, data flows, API endpoints, and integrations needed? Do NOT skip non-obvious implementation details. Examples of tasks that are commonly missed:
+- Any custom UI component (e.g. a PIN screen MUST include "Custom 0–9 digit keyboard UI component"; a date picker MUST include the calendar grid)
+- Every distinct API endpoint or backend service call
+- Data persistence, local storage, or state management
+- Navigation / routing changes
+- Device hardware or OS API integrations (camera, biometrics, notifications, etc.)
+- Animation or transition implementation if specified in the design
+
 EXHAUSTIVE EDGE CASE COVERAGE — you MUST include separate tasks for ALL of the following categories within edgeCases:
 - Error / failure states: wrong credentials, expired tokens, network timeout, server 5xx responses
 - Validation: client-side field validation (format, required, length) AND server-side validation errors

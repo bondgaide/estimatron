@@ -106,7 +106,10 @@ if (typeof document !== 'undefined') {
   function updateButtonState() {
     generateBtn.disabled = !(requirementsEl.value.trim().length > 0 || uploadedImages.length > 0);
   }
-  requirementsEl.addEventListener('input', updateButtonState);
+  requirementsEl.addEventListener('input', () => {
+    requirementsEl.classList.remove('error');
+    updateButtonState();
+  });
   platformSelect.addEventListener('change', () => {
     const isApiOnly = platformSelect.value === 'api';
     includeBackendCheck.disabled = isApiOnly;
@@ -365,6 +368,11 @@ if (typeof document !== 'undefined') {
     const includeGa       = includeGaCheck.checked && !includeGaCheck.disabled;
     const includeAiAssist = includeAiAssistCheck.checked;
 
+    if (!requirements && uploadedImages.length === 0) {
+      requirementsEl.classList.add('error');
+      showToast('Please describe the feature you want to estimate');
+      return;
+    }
     startLoading();
 
     try {

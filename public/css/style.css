@@ -73,6 +73,18 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
 .textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
 .textarea::placeholder { color: var(--text4); font-size: 14px; }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+.textarea.error {
+  border-color: #ef4444;
+  animation: shake 0.35s ease;
+}
+
 /* ── Upload column ── */
 .upload-col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .upload-zone {

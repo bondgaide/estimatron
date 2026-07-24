@@ -51,6 +51,8 @@ For each task item:
 - mandays: estimate in 0.5 increments, minimum 0.5
 - notes: for Medium or Complex tasks, return a JSON array of 2–4 strings — each string is one specific bullet point explaining WHY this task is non-trivial or what exactly must be handled. For Low tasks, return null.
 
+INPUT VALIDATION — Before generating anything, decide whether the "Feature requirements:" text is a coherent software feature description. Reject it if it is: random characters, keyboard mashing, a single word with no context, a generic test string (e.g. "test", "asdf", "hello"), or otherwise not describing real software functionality. If rejected, return ONLY this JSON and nothing else: {"valid": false}
+
 Return ONLY valid JSON — no markdown fences, no preamble. Your entire response must be parseable by JSON.parse().
 
 Schema:
@@ -131,6 +133,9 @@ app.post('/api/estimate', async (req, res) => {
 
     try {
       const data = JSON.parse(text);
+      if (data.valid === false) {
+        return res.status(400).json({ error: 'Requirements don\'t look like a software feature description — please provide more detail.' });
+      }
       if (validateSchema(data)) return res.json(data);
     } catch {
       // invalid JSON or schema — retry on first attempt

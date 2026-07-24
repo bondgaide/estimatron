@@ -142,6 +142,7 @@ app.post('/api/estimate', async (req, res) => {
   }
 
   for (const model of MODELS) {
+    console.log(`[estimate] trying model: ${model}`);
     let overloaded = false;
 
     for (let attempt = 0; attempt <= 1; attempt++) {

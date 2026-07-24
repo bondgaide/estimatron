@@ -15,8 +15,9 @@
   --text4:   #475569;
 }
 
-html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
-.app { display: flex; flex-direction: column; min-height: 100vh; }
+html { overflow-x: hidden; }
+body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+.app { display: flex; flex-direction: column; min-height: 100vh; width: 100%; overflow-x: hidden; }
 
 /* ── Header ── */
 .app-header {

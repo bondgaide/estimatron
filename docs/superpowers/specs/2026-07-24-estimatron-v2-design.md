@@ -88,7 +88,16 @@ A single CSS media query at `max-width: 768px`:
 - New approach: each task row stores references directly — `row._taskRef = taskObject` (a direct object reference into `window._currentEstimate`)
 - Export functions read from `window._currentEstimate` which is kept in sync at every edit event
 
-### 3.4 Loading State (Option A)
+### 3.4 Image Thumbnails
+
+When a user adds images via the upload zone, each thumbnail (`.thumb`) currently shows a static emoji icon. Replace with a real image preview:
+
+- `renderThumbs()` in `app.js` creates an `<img>` element with `src="data:${img.mediaType};base64,${img.data}"` using the already-encoded base64 data already in memory
+- Image styled with `width:100%; height:100%; object-fit:cover; border-radius:7px;` to fill the thumb container
+- The `✕` remove button remains positioned absolutely over the top-right corner of the thumbnail
+- No server changes — entirely client-side, no additional encoding step required
+
+### 3.5 Loading State (Option A) <!-- was 3.4 -->
 
 When the Generate button is clicked and a request is in flight:
 
@@ -115,7 +124,7 @@ On success or error: remove `is-loading` class, clear the interval, restore butt
 - Replace emoji icon with minimal 2D SVG arrow-up icon (32×32, stroke style, accent colour)
 - Upload zone uses `flex: 1` to fill full right-column height; Generate button `flex-shrink: 0` stays pinned at bottom
 
-### 3.5 INCLUDES Checkboxes
+### 3.6 INCLUDES Checkboxes
 
 **UI — Input form:**
 

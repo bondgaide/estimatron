@@ -260,6 +260,13 @@ html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', system-ui, 
   .task-remove-btn { opacity: 1; }
   .task-main { flex-wrap: wrap; }
   .task-name-edit { flex: 1 1 100%; }
+  /* Grid children must have min-width:0 or the 1fr track expands to fit intrinsic content width */
+  .input-left, .upload-col { min-width: 0; }
+  /* Select also needs min-width:0 so it doesn't overflow its flex parent */
+  .platform-select { min-width: 0; }
+  /* Toolbar: title gets remaining space and ellipses; chip never squishes */
+  .estimate-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .platform-chip { flex-shrink: 0; }
 }
 @media (hover: none) {
   .task-remove-btn { opacity: 1; }

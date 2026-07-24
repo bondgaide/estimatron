@@ -210,9 +210,11 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
   background: none; border: none; color: var(--text4); font-size: 13px;
   cursor: pointer; flex-shrink: 0; padding: 2px 6px; line-height: 1;
   border-radius: 4px; opacity: 0; transition: opacity 0.15s, color 0.15s;
+  display: inline-flex; align-items: center; gap: 4px;
 }
 .task-row:hover .task-remove-btn { opacity: 1; }
 .task-remove-btn:hover { color: #fca5a5; }
+.remove-label { display: none; font-size: 11px; font-weight: 600; }
 
 /* ── Add task ── */
 .add-task-btn {
@@ -388,7 +390,8 @@ body, .app-header, .input-card, .estimate-card { transition: background-color 0.
   .badge-group { flex-wrap: wrap; }
   .export-btns { width: 100%; }
   .btn-sm { flex: 1; text-align: center; }
-  .task-remove-btn { opacity: 1; }
+  .task-remove-btn { opacity: 1; color: var(--text3); }
+  .remove-label { display: inline; }
   .task-main { flex-wrap: wrap; }
   .task-name-edit { flex: 1 1 100%; }
   .textarea { resize: none; }

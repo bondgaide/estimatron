@@ -310,9 +310,10 @@ function buildTaskRow(task, taskArr) {
   const removeBtn = document.createElement('button');
   removeBtn.className = 'task-remove-btn';
   removeBtn.title = 'Remove task';
-  removeBtn.textContent = '✕';
+  removeBtn.innerHTML = '✕<span class="remove-label">Delete Task</span>';
   removeBtn.type = 'button';
   removeBtn.addEventListener('click', () => {
+    if (!confirm('Delete this task?')) return;
     const idx = row._taskArr.indexOf(row._taskRef);
     if (idx !== -1) row._taskArr.splice(idx, 1);
     row.remove();

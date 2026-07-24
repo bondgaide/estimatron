@@ -187,6 +187,7 @@ if (typeof document !== 'undefined') {
       const rm = document.createElement('button');
       rm.type = 'button';
       rm.className = 'tech-chip-remove';
+      rm.style.color = s.text;
       rm.innerHTML = '&times;';
       rm.addEventListener('click', (e) => {
         e.stopPropagation();

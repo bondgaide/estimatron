@@ -339,9 +339,11 @@ body, .app-header, .input-card, .estimate-card { transition: background-color 0.
 }
 .tech-chip-remove {
   background: none; border: none; cursor: pointer; font-size: 14px; line-height: 1;
-  padding: 0 2px; font-family: inherit; opacity: 0.55; transition: opacity 0.15s;
+  padding: 0 2px; font-family: inherit; color: inherit; opacity: 0.55; transition: opacity 0.15s;
 }
 .tech-chip-remove:hover { opacity: 1; }
+#techChips, #existingCompChips { display: inline-flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.tech-chip-hint { font-size: 11px; color: var(--text4); padding: 2px 2px; }
 .tech-dropdown {
   display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20;
   background: var(--surface2); border: 1.5px solid var(--border2);

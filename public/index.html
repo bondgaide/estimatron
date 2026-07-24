@@ -35,9 +35,13 @@
           </div>
           <div class="includes-row">
             <span class="includes-label">Includes</span>
+            <label class="check-label" for="includeAiAssistCheck">
+              <input type="checkbox" id="includeAiAssistCheck" checked />
+              AI Assist
+            </label>
             <label class="check-label" for="includeTestingCheck">
               <input type="checkbox" id="includeTestingCheck" />
-              Testing
+              Test
             </label>
             <label class="check-label" id="includeBackendLabel" for="includeBackendCheck">
               <input type="checkbox" id="includeBackendCheck" />
@@ -46,10 +50,6 @@
             <label class="check-label" id="includeGaLabel" for="includeGaCheck">
               <input type="checkbox" id="includeGaCheck" />
               GA
-            </label>
-            <label class="check-label" for="includeAiAssistCheck">
-              <input type="checkbox" id="includeAiAssistCheck" checked />
-              AI Assist
             </label>
           </div>
           <div class="tech-stack-row">
@@ -81,6 +81,7 @@
                 <input class="tech-chip-input" id="existingCompInput" type="text"
                        placeholder="e.g. Custom TextField, Auth Service, BFF Layer…" autocomplete="off" />
               </div>
+              <div class="tech-chip-hint">Press Enter or , to add a tag</div>
             </div>
           </div>
         </div>

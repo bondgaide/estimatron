@@ -27,6 +27,16 @@ const TECH_CAT_STYLES = {
   Custom:            { dot: '#888780', border: '#5F5E5A', text: '#D3D1C7', bg: 'rgba(95,94,90,0.15)' },
 };
 
+const TECH_CAT_STYLES_LIGHT = {
+  Frontend:          { dot: '#534AB7', border: '#534AB7', text: '#3a328a', bg: 'rgba(83,74,183,0.10)' },
+  Backend:           { dot: '#b87720', border: '#7a4a0a', text: '#8a5510', bg: 'rgba(150,90,10,0.10)' },
+  Database:          { dot: '#993556', border: '#993556', text: '#7a1f42', bg: 'rgba(153,53,86,0.10)' },
+  iOS:               { dot: '#185FA5', border: '#185FA5', text: '#135189', bg: 'rgba(24,95,165,0.10)' },
+  Android:           { dot: '#3B6D11', border: '#3B6D11', text: '#2a4e0c', bg: 'rgba(59,109,17,0.10)' },
+  'Mobile Framework':{ dot: '#0F6E56', border: '#0F6E56', text: '#095c46', bg: 'rgba(15,110,86,0.10)' },
+  Custom:            { dot: '#5F5E5A', border: '#5F5E5A', text: '#4a4946', bg: 'rgba(95,94,90,0.10)' },
+};
+
 // ── Pure helpers (exported for testing) ──────────────────────────────
 function validateFile(file) {
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -105,7 +115,20 @@ if (typeof document !== 'undefined') {
     if (techDropdown.classList.contains('open')) renderTechDropdown();
   });
 
+  // ── Theme toggle ───────────────────────────────────────────────────
+  document.querySelector('.logo-dot').addEventListener('click', () => {
+    const isLight = document.documentElement.classList.toggle('light');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    renderTechChips();
+    if (techDropdown.classList.contains('open')) renderTechDropdown();
+  });
+
   // ── Tech Stack ─────────────────────────────────────────────────────
+  function getCatStyle(cat) {
+    const map = document.documentElement.classList.contains('light') ? TECH_CAT_STYLES_LIGHT : TECH_CAT_STYLES;
+    return map[cat] || map.Custom;
+  }
+
   function getTechCategories() {
     const all = TECH_STACKS[platformSelect.value] || {};
     if (includeBackendCheck.checked) return all;
@@ -117,7 +140,7 @@ if (typeof document !== 'undefined') {
   function renderTechChips() {
     techChipsEl.innerHTML = '';
     techChips.forEach(({ label, cat }) => {
-      const s = TECH_CAT_STYLES[cat] || TECH_CAT_STYLES.Custom;
+      const s = getCatStyle(cat);
       const chip = document.createElement('span');
       chip.className = 'tech-chip';
       chip.style.cssText = `border-color:${s.border};color:${s.text};background:${s.bg}`;
@@ -148,7 +171,7 @@ if (typeof document !== 'undefined') {
     Object.entries(cats).forEach(([cat, items]) => {
       const filtered = items.filter(item => !selected.has(item) && (!q || item.toLowerCase().includes(q)));
       if (!filtered.length) return;
-      const s = TECH_CAT_STYLES[cat];
+      const s = getCatStyle(cat);
       const catLbl = document.createElement('div');
       catLbl.className = 'tech-cat-label';
       const dot = document.createElement('span');

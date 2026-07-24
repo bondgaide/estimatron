@@ -25,7 +25,8 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
   padding: 0 40px; height: 62px; display: flex; align-items: center; gap: 14px;
   flex-shrink: 0; position: sticky; top: 0; z-index: 10;
 }
-.logo-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 14px var(--accent); flex-shrink: 0; }
+.logo-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 14px var(--accent); flex-shrink: 0; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; }
+.logo-dot:active { transform: scale(0.8); }
 .logo { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.8px; }
 .logo span { color: var(--accent); }
 .tagline { font-size: 13px; color: var(--text4); margin-left: 4px; }
@@ -245,6 +246,42 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
 .toast.toast-error   { border-color: #7f1d1d; color: #fca5a5; }
 .toast.toast-success { border-color: #166534; color: #86efac; }
 .toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+/* ── Light mode ── */
+html.light {
+  --bg:         #f4f6fb;
+  --surface:    #ffffff;
+  --surface2:   #eef1f8;
+  --border:     #e2e8f0;
+  --border2:    #cbd5e1;
+  --text:       #0f172a;
+  --text2:      #1e293b;
+  --text3:      #475569;
+  --text4:      #94a3b8;
+  --accent-dim: rgba(161,0,255,0.08);
+  --accent-glow:rgba(161,0,255,0.18);
+}
+html.light body   { background: var(--bg); }
+html.light .logo  { color: var(--text); }
+html.light .logo-dot { box-shadow: 0 0 10px rgba(161,0,255,0.4); }
+html.light .upload-zone { border-color: #c4b5e8; background: #f5f0ff; }
+html.light .upload-zone:hover, html.light .upload-zone.drag-over { background: #ede6ff; }
+html.light .upload-optional { background: rgba(0,0,0,0.04); }
+html.light .badge-low     { background: #dcfce7; color: #166534; border-color: #86efac; }
+html.light .badge-med     { background: #ede9fe; color: #4338ca; border-color: #a5b4fc; }
+html.light .badge-complex { background: #faf5ff; color: #7e22ce; border-color: #d8b4fe; }
+html.light .group-line    { background: #e5e7f5; }
+html.light .task-desc     { background: #f8faff; border-top-color: #e5e8f5; }
+html.light .total-bar     { background: #f0f2fa; }
+html.light .thumb         { background: #f0eaff; border-color: #c4b5e8; }
+html.light .md-input      { background: var(--bg); }
+html.light .platform-select option { background: var(--surface); }
+html.light .platform-chip { color: #7c3aed; }
+html.light .toast         { background: var(--surface); }
+html.light .regen-btn:hover, html.light .btn-sm:hover { color: #7c3aed; }
+/* smooth bg transitions on mode switch */
+body, .app-header, .input-card, .estimate-card { transition: background-color 0.2s, border-color 0.2s; }
+.logo { transition: color 0.2s; }
 
 /* ── Tech Stack ── */
 .tech-stack-row { display: flex; flex-direction: column; gap: 6px; }

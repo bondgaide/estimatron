@@ -14,11 +14,16 @@ const SYSTEM_PROMPT = `You are a senior software architect and estimation expert
 Given a feature description (and optionally UI screenshots/wireframes) and a target platform, produce a structured task breakdown.
 
 Platform group names to use:
-- "web":     groups "Frontend" and "Backend"
-- "ios":     groups "iOS" and "Backend"
-- "android": groups "Android" and "Backend"
-- "cross":   groups "iOS", "Android", and "Backend"
-- "api":     group "Backend" only
+- "web":     groups "Frontend", "BFF", "Orchestrator", and "Adaptor"
+- "ios":     groups "iOS", "BFF", "Orchestrator", and "Adaptor"
+- "android": groups "Android", "BFF", "Orchestrator", and "Adaptor"
+- "cross":   groups "iOS", "Android", "BFF", "Orchestrator", and "Adaptor"
+- "api":     groups "BFF", "Orchestrator", and "Adaptor"
+
+Layer definitions:
+- BFF (Backend-for-Frontend): API gateway, request aggregation, response shaping, authentication token handling, rate limiting
+- Orchestrator: business logic, use-case coordination, service composition, workflow management
+- Adaptor: external service integrations, third-party APIs, database repositories, message queues, storage adapters
 
 For each group, break the work into three subgroups:
 1. tasks — core implementation work
@@ -32,6 +37,10 @@ COMPREHENSIVE CORE TASK COVERAGE — For the "tasks" subgroup, you MUST include 
 - Navigation / routing changes
 - Device hardware or OS API integrations (camera, biometrics, notifications, etc.)
 - Animation or transition implementation if specified in the design
+- For BFF tasks: include endpoint definitions, request validation, response mapping, and auth middleware
+- For Orchestrator tasks: include use-case classes, service calls, error propagation, and transaction handling
+- For Adaptor tasks: include repository implementations, DTO mapping, retry logic, and external API error handling
+- If the requirements involve content types, taxonomies, or CMS integrations, include tasks for content modelling, taxonomy setup, CMS configuration, content migration, and taxonomy API endpoints
 
 EXHAUSTIVE EDGE CASE COVERAGE — you MUST include separate tasks for ALL of the following categories within edgeCases:
 - Error / failure states: wrong credentials, expired tokens, network timeout, server 5xx responses
@@ -90,7 +99,7 @@ function validateSchema(data) {
   return true;
 }
 
-async function callGemini(requirements, platform, images, includeTesting, includeBackend, techStack) {
+async function callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.5-flash',
@@ -104,10 +113,16 @@ async function callGemini(requirements, platform, images, includeTesting, includ
 
   let instructions = '';
   if (!includeTesting) instructions += '\nIMPORTANT: Return an empty array `[]` for the "testing" field on every group.\n';
-  if (!includeBackend) instructions += '\nIMPORTANT: Do NOT include a group named "Backend" in your response.\n';
+  if (!includeBackend) instructions += '\nIMPORTANT: Do NOT include any of the following groups in your response: "BFF", "Orchestrator", "Adaptor".\n';
+  if (includeGa) instructions += '\nIMPORTANT: Include Google Analytics implementation tasks in every Frontend group. These tasks should cover: GA4 setup and configuration, page view tracking, custom event definitions, and cookie/consent integration.\n';
+  if (includeAiAssist) instructions += '\nIMPORTANT: This project uses AI coding assistance tools (e.g. GitHub Copilot, Cursor). Calibrate all manday estimates to reflect AI-assisted development — well-understood patterns and boilerplate tasks should be estimated lower than they would be without AI tooling.\n';
 
   let userText = `Platform: ${platform}\n\nFeature requirements:\n${requirements}`;
   if (techStack && techStack.length > 0) userText += `\n\nTech stack: ${techStack.join(', ')}`;
+  if (existingComponents && existingComponents.length > 0) {
+    userText += `\n\nExisting components / foundation already in place: ${existingComponents.join(', ')}`;
+    userText += `\nDo not generate tasks for these. If an existing component reduces the scope of a task, reflect that with a lower manday estimate and note it.`;
+  }
   userText += instructions;
   parts.push({ text: userText });
 
@@ -116,7 +131,7 @@ async function callGemini(requirements, platform, images, includeTesting, includ
 }
 
 app.post('/api/estimate', async (req, res) => {
-  const { requirements, platform, images = [], includeTesting = true, includeBackend = true, techStack = [] } = req.body;
+  const { requirements, platform, images = [], includeTesting = true, includeBackend = true, techStack = [], includeGa = false, includeAiAssist = true, existingComponents = [] } = req.body;
 
   if (!requirements || !requirements.trim()) {
     return res.status(400).json({ error: 'requirements is required' });
@@ -128,7 +143,7 @@ app.post('/api/estimate', async (req, res) => {
   for (let attempt = 0; attempt <= 1; attempt++) {
     let text;
     try {
-      text = await callGemini(requirements, platform, images, includeTesting, includeBackend, techStack);
+      text = await callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents);
     } catch (err) {
       console.error('Gemini API error:', err.message);
       return res.status(502).json({ error: 'Generation failed — please try again' });

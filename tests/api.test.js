@@ -135,7 +135,7 @@ describe('POST /api/estimate — INCLUDES params', () => {
     expect(res.status).toBe(200);
     expect(mockFn).toHaveBeenCalledWith(
       expect.arrayContaining([
-        expect.objectContaining({ text: expect.stringContaining('Do NOT include a group named') }),
+        expect.objectContaining({ text: expect.stringContaining('Do NOT include any of the following groups') }),
       ])
     );
   });
@@ -170,5 +170,55 @@ describe('validateSchema', () => {
     const good = JSON.parse(JSON.stringify(validPayload));
     delete good.groups[1].tasks[0].notes;  // simulate Gemini omitting the field
     expect(validateSchema(good)).toBe(true);
+  });
+});
+
+describe('POST /api/estimate — v1.1 params', () => {
+  test('includeGa: true appends GA instruction to prompt', async () => {
+    const mockFn = jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(validPayload) } });
+    makeClient(mockFn);
+    const res = await request(app)
+      .post('/api/estimate')
+      .send({ requirements: 'login screen', platform: 'web', includeGa: true });
+    expect(res.status).toBe(200);
+    expect(mockFn).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ text: expect.stringContaining('Google Analytics') }),
+      ])
+    );
+  });
+
+  test('includeAiAssist: false omits AI assist instruction from prompt', async () => {
+    const mockFn = jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(validPayload) } });
+    makeClient(mockFn);
+    await request(app)
+      .post('/api/estimate')
+      .send({ requirements: 'login screen', platform: 'web', includeAiAssist: false });
+    const [parts] = mockFn.mock.calls[0];
+    const textPart = parts.find(p => typeof p.text === 'string');
+    expect(textPart.text).not.toContain('AI coding assistance');
+  });
+
+  test('includeAiAssist defaults to true and appends AI assist instruction', async () => {
+    const mockFn = jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(validPayload) } });
+    makeClient(mockFn);
+    await request(app)
+      .post('/api/estimate')
+      .send({ requirements: 'login screen', platform: 'web' });
+    const [parts] = mockFn.mock.calls[0];
+    const textPart = parts.find(p => typeof p.text === 'string');
+    expect(textPart.text).toContain('AI coding assistance');
+  });
+
+  test('existingComponents are appended to the prompt', async () => {
+    const mockFn = jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(validPayload) } });
+    makeClient(mockFn);
+    await request(app)
+      .post('/api/estimate')
+      .send({ requirements: 'login screen', platform: 'web', existingComponents: ['CustomTextField', 'AuthService'] });
+    const [parts] = mockFn.mock.calls[0];
+    const textPart = parts.find(p => typeof p.text === 'string');
+    expect(textPart.text).toContain('CustomTextField');
+    expect(textPart.text).toContain('AuthService');
   });
 });

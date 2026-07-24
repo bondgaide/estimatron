@@ -184,7 +184,8 @@ if (typeof document !== 'undefined') {
       el.style.cssText = `background:${s.bg};border-color:${s.border};color:${s.text};`;
       const label = document.createElement('span');
       label.textContent = chip.label;
-      const rm = document.createElement('span');
+      const rm = document.createElement('button');
+      rm.type = 'button';
       rm.className = 'tech-chip-remove';
       rm.innerHTML = '&times;';
       rm.addEventListener('click', () => {
@@ -409,7 +410,7 @@ if (typeof document !== 'undefined') {
     const requirements  = requirementsEl.value.trim();
     const platform      = platformSelect.value;
     const includeTesting = includeTestingCheck.checked;
-    const includeBackend = includeBackendCheck.checked && !includeBackendCheck.disabled;
+    const includeBackend = includeBackendCheck.disabled || includeBackendCheck.checked;
     const includeGa       = includeGaCheck.checked && !includeGaCheck.disabled;
     const includeAiAssist = includeAiAssistCheck.checked;
 

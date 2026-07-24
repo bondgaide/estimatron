@@ -114,6 +114,7 @@ if (typeof document !== 'undefined') {
     inputCard.classList.remove('is-loading');
     generateBtn.classList.remove('is-loading');
     generateBtn.innerHTML = 'Generate Estimation';
+    generateBtn.disabled = false;
     if (_loadingInterval) { clearInterval(_loadingInterval); _loadingInterval = null; }
     if (_statusMsgEl)     { _statusMsgEl.remove(); _statusMsgEl = null; }
   }

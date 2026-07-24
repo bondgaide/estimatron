@@ -104,28 +104,40 @@ describe('POST /api/estimate — Claude integration', () => {
 });
 
 describe('POST /api/estimate — INCLUDES params', () => {
-  test('accepts includeTesting: false and returns 200', async () => {
+  test('accepts includeTesting: false and passes instruction to Gemini', async () => {
     const noTestingPayload = {
       ...validPayload,
       groups: validPayload.groups.map(g => ({ ...g, testing: [] })),
     };
-    makeClient(jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(noTestingPayload) } }));
+    const mockFn = jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(noTestingPayload) } });
+    makeClient(mockFn);
     const res = await request(app)
       .post('/api/estimate')
       .send({ requirements: 'login screen', platform: 'web', includeTesting: false });
     expect(res.status).toBe(200);
+    expect(mockFn).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ text: expect.stringContaining('Return an empty array') }),
+      ])
+    );
   });
 
-  test('accepts includeBackend: false and returns 200', async () => {
+  test('accepts includeBackend: false and passes instruction to Gemini', async () => {
     const noBackendPayload = {
       title: 'Login Screen',
       groups: [validPayload.groups[0]],
     };
-    makeClient(jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(noBackendPayload) } }));
+    const mockFn = jest.fn().mockResolvedValue({ response: { text: () => JSON.stringify(noBackendPayload) } });
+    makeClient(mockFn);
     const res = await request(app)
       .post('/api/estimate')
       .send({ requirements: 'login screen', platform: 'web', includeBackend: false });
     expect(res.status).toBe(200);
+    expect(mockFn).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ text: expect.stringContaining('Do NOT include a group named') }),
+      ])
+    );
   });
 });
 
@@ -152,5 +164,11 @@ describe('validateSchema', () => {
     const bad = JSON.parse(JSON.stringify(validPayload));
     bad.groups[1].tasks[0].notes = [];
     expect(validateSchema(bad)).toBe(false);
+  });
+
+  test('accepts notes as undefined (omitted field treated same as null)', () => {
+    const good = JSON.parse(JSON.stringify(validPayload));
+    delete good.groups[1].tasks[0].notes;  // simulate Gemini omitting the field
+    expect(validateSchema(good)).toBe(true);
   });
 });

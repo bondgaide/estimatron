@@ -71,7 +71,7 @@ function validateSchema(data) {
       if (typeof task.name !== 'string')                          return false;
       if (!['Low', 'Medium', 'Complex'].includes(task.complexity)) return false;
       if (typeof task.mandays !== 'number' || task.mandays < 0.5) return false;
-      if (task.notes !== null) {
+      if (task.notes != null) {
         if (!Array.isArray(task.notes) || task.notes.length === 0) return false;
         if (!task.notes.every(n => typeof n === 'string' && n.trim().length > 0)) return false;
       }

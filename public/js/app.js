@@ -9,6 +9,24 @@ const PLATFORM_LABELS = {
   api:     'API / Backend only',
 };
 
+const TECH_STACKS = {
+  web:     { Frontend: ['React','Vue.js','Angular','Svelte','Next.js','Nuxt.js','TypeScript','Tailwind CSS','SASS','Redux','Zustand'], Backend: ['Node.js','Express','NestJS','Django','FastAPI','Flask','Spring Boot','Ruby on Rails','Laravel','Go','.NET','GraphQL'], Database: ['PostgreSQL','MySQL','MongoDB','Redis','SQLite','Firebase','Supabase','DynamoDB','Prisma','TypeORM'] },
+  ios:     { iOS: ['Swift','SwiftUI','UIKit','Core Data','Combine','XCTest','Objective-C'], Backend: ['Node.js','Express','NestJS','Django','FastAPI','Flask','Spring Boot','Ruby on Rails','Laravel','Go','.NET','GraphQL'], Database: ['PostgreSQL','MySQL','MongoDB','Redis','SQLite','Firebase','Supabase','DynamoDB','Prisma','TypeORM'] },
+  android: { Android: ['Kotlin','Jetpack Compose','Android SDK','Room','Retrofit','Coroutines','Gradle'], Backend: ['Node.js','Express','NestJS','Django','FastAPI','Flask','Spring Boot','Ruby on Rails','Laravel','Go','.NET','GraphQL'], Database: ['PostgreSQL','MySQL','MongoDB','Redis','SQLite','Firebase','Supabase','DynamoDB','Prisma','TypeORM'] },
+  cross:   { 'Mobile Framework': ['React Native','Flutter','Expo','Dart','NativeScript'], Backend: ['Node.js','Express','NestJS','Django','FastAPI','Flask','Spring Boot','Ruby on Rails','Laravel','Go','.NET','GraphQL'], Database: ['PostgreSQL','MySQL','MongoDB','Redis','SQLite','Firebase','Supabase','DynamoDB','Prisma','TypeORM'] },
+  api:     { Backend: ['Node.js','Express','NestJS','Django','FastAPI','Flask','Spring Boot','Ruby on Rails','Laravel','Go','.NET','GraphQL'], Database: ['PostgreSQL','MySQL','MongoDB','Redis','SQLite','Firebase','Supabase','DynamoDB','Prisma','TypeORM'] },
+};
+
+const TECH_CAT_STYLES = {
+  Frontend:          { dot: '#7F77DD', border: '#534AB7', text: '#AFA9EC', bg: 'rgba(83,74,183,0.18)' },
+  Backend:           { dot: '#EF9F27', border: '#7a4a0a', text: '#FAC775', bg: 'rgba(133,79,11,0.18)' },
+  Database:          { dot: '#D4537E', border: '#993556', text: '#F4C0D1', bg: 'rgba(153,53,86,0.18)' },
+  iOS:               { dot: '#378ADD', border: '#185FA5', text: '#B5D4F4', bg: 'rgba(24,95,165,0.18)' },
+  Android:           { dot: '#639922', border: '#3B6D11', text: '#C0DD97', bg: 'rgba(59,109,17,0.18)' },
+  'Mobile Framework':{ dot: '#1D9E75', border: '#0F6E56', text: '#9FE1CB', bg: 'rgba(15,110,86,0.18)' },
+  Custom:            { dot: '#888780', border: '#5F5E5A', text: '#D3D1C7', bg: 'rgba(95,94,90,0.15)' },
+};
+
 // ── Pure helpers (exported for testing) ──────────────────────────────
 function validateFile(file) {
   if (!ALLOWED_TYPES.includes(file.type)) {
@@ -33,6 +51,7 @@ function encodeImageToBase64(file) {
 if (typeof document !== 'undefined') {
 
   let uploadedImages = [];
+  let techChips      = [];
 
   const platformSelect  = document.getElementById('platformSelect');
   const requirementsEl  = document.getElementById('requirements');
@@ -51,6 +70,10 @@ if (typeof document !== 'undefined') {
   const includeBackendCheck  = document.getElementById('includeBackendCheck');
   const includeBackendLabel  = document.getElementById('includeBackendLabel');
   const inputCard            = document.querySelector('.input-card');
+  const techChipWrap  = document.getElementById('techChipWrap');
+  const techChipInput = document.getElementById('techChipInput');
+  const techDropdown  = document.getElementById('techDropdown');
+  const techChipsEl   = document.getElementById('techChips');
 
   // ── Toast ──────────────────────────────────────────────────────────
   window.showToast = function showToast(message, type = 'error') {
@@ -76,6 +99,135 @@ if (typeof document !== 'undefined') {
     includeBackendCheck.disabled = isApiOnly;
     includeBackendLabel.classList.toggle('disabled', isApiOnly);
     includeBackendCheck.checked = isApiOnly;
+    if (techDropdown.classList.contains('open')) renderTechDropdown();
+  });
+  includeBackendCheck.addEventListener('change', () => {
+    if (techDropdown.classList.contains('open')) renderTechDropdown();
+  });
+
+  // ── Tech Stack ─────────────────────────────────────────────────────
+  function getTechCategories() {
+    const all = TECH_STACKS[platformSelect.value] || {};
+    if (includeBackendCheck.checked) return all;
+    return Object.fromEntries(
+      Object.entries(all).filter(([cat]) => cat !== 'Backend' && cat !== 'Database')
+    );
+  }
+
+  function renderTechChips() {
+    techChipsEl.innerHTML = '';
+    techChips.forEach(({ label, cat }) => {
+      const s = TECH_CAT_STYLES[cat] || TECH_CAT_STYLES.Custom;
+      const chip = document.createElement('span');
+      chip.className = 'tech-chip';
+      chip.style.cssText = `border-color:${s.border};color:${s.text};background:${s.bg}`;
+      chip.textContent = label;
+      const rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'tech-chip-remove';
+      rm.style.color = s.text;
+      rm.textContent = '×';
+      rm.addEventListener('click', (e) => {
+        e.stopPropagation();
+        techChips = techChips.filter(c => c.label !== label);
+        renderTechChips();
+        if (techDropdown.classList.contains('open')) renderTechDropdown();
+      });
+      chip.appendChild(rm);
+      techChipsEl.appendChild(chip);
+    });
+  }
+
+  function renderTechDropdown() {
+    const q = techChipInput.value.trim().toLowerCase();
+    const cats = getTechCategories();
+    const selected = new Set(techChips.map(c => c.label));
+    techDropdown.innerHTML = '';
+    let hasItems = false;
+
+    Object.entries(cats).forEach(([cat, items]) => {
+      const filtered = items.filter(item => !selected.has(item) && (!q || item.toLowerCase().includes(q)));
+      if (!filtered.length) return;
+      const s = TECH_CAT_STYLES[cat];
+      const catLbl = document.createElement('div');
+      catLbl.className = 'tech-cat-label';
+      const dot = document.createElement('span');
+      dot.className = 'tech-cat-dot';
+      dot.style.background = s.dot;
+      catLbl.appendChild(dot);
+      catLbl.appendChild(document.createTextNode(cat));
+      techDropdown.appendChild(catLbl);
+      const row = document.createElement('div');
+      row.className = 'tech-cat-items';
+      filtered.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tech-suggestion';
+        btn.style.cssText = `border-color:${s.border};color:${s.text};background:${s.bg}`;
+        btn.textContent = item;
+        btn.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          techChips.push({ label: item, cat });
+          renderTechChips();
+          techChipInput.value = '';
+          renderTechDropdown();
+        });
+        row.appendChild(btn);
+      });
+      techDropdown.appendChild(row);
+      hasItems = true;
+    });
+
+    if (q) {
+      const raw = techChipInput.value.trim();
+      if (!selected.has(raw)) {
+        const allItems = Object.values(cats).flat();
+        if (!allItems.some(i => i.toLowerCase() === q)) {
+          const hint = document.createElement('div');
+          hint.className = 'tech-empty';
+          hint.textContent = `Press Enter to add "${raw}"`;
+          techDropdown.appendChild(hint);
+          hasItems = true;
+        }
+      }
+    }
+
+    if (!hasItems) {
+      const empty = document.createElement('div');
+      empty.className = 'tech-empty';
+      empty.textContent = Object.keys(cats).length === 0 ? 'No categories for this platform' : 'All suggestions selected';
+      techDropdown.appendChild(empty);
+    }
+  }
+
+  techChipWrap.addEventListener('click', () => techChipInput.focus());
+  techChipInput.addEventListener('focus', () => {
+    techChipWrap.classList.add('focused');
+    renderTechDropdown();
+    techDropdown.classList.add('open');
+  });
+  techChipInput.addEventListener('blur', () => {
+    techChipWrap.classList.remove('focused');
+    setTimeout(() => techDropdown.classList.remove('open'), 150);
+  });
+  techChipInput.addEventListener('input', () => renderTechDropdown());
+  techChipInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const label = techChipInput.value.trim();
+      if (label && !techChips.some(c => c.label.toLowerCase() === label.toLowerCase())) {
+        techChips.push({ label, cat: 'Custom' });
+        renderTechChips();
+        techChipInput.value = '';
+        renderTechDropdown();
+      }
+    } else if (e.key === 'Escape') {
+      techDropdown.classList.remove('open');
+    } else if (e.key === 'Backspace' && !techChipInput.value && techChips.length) {
+      techChips.pop();
+      renderTechChips();
+      if (techDropdown.classList.contains('open')) renderTechDropdown();
+    }
   });
 
   // ── Loading state ──────────────────────────────────────────────────
@@ -188,7 +340,7 @@ if (typeof document !== 'undefined') {
       const res  = await fetch('/api/estimate', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend }),
+        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend, techStack: techChips.map(c => c.label) }),
       });
       const data = await res.json();
 

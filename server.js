@@ -90,7 +90,7 @@ function validateSchema(data) {
   return true;
 }
 
-async function callGemini(requirements, platform, images, includeTesting, includeBackend) {
+async function callGemini(requirements, platform, images, includeTesting, includeBackend, techStack) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.5-flash',
@@ -106,14 +106,17 @@ async function callGemini(requirements, platform, images, includeTesting, includ
   if (!includeTesting) instructions += '\nIMPORTANT: Return an empty array `[]` for the "testing" field on every group.\n';
   if (!includeBackend) instructions += '\nIMPORTANT: Do NOT include a group named "Backend" in your response.\n';
 
-  parts.push({ text: `Platform: ${platform}\n\nFeature requirements:\n${requirements}${instructions}` });
+  let userText = `Platform: ${platform}\n\nFeature requirements:\n${requirements}`;
+  if (techStack && techStack.length > 0) userText += `\n\nTech stack: ${techStack.join(', ')}`;
+  userText += instructions;
+  parts.push({ text: userText });
 
   const result = await model.generateContent(parts);
   return result.response.text();
 }
 
 app.post('/api/estimate', async (req, res) => {
-  const { requirements, platform, images = [], includeTesting = true, includeBackend = true } = req.body;
+  const { requirements, platform, images = [], includeTesting = true, includeBackend = true, techStack = [] } = req.body;
 
   if (!requirements || !requirements.trim()) {
     return res.status(400).json({ error: 'requirements is required' });
@@ -125,7 +128,7 @@ app.post('/api/estimate', async (req, res) => {
   for (let attempt = 0; attempt <= 1; attempt++) {
     let text;
     try {
-      text = await callGemini(requirements, platform, images, includeTesting, includeBackend);
+      text = await callGemini(requirements, platform, images, includeTesting, includeBackend, techStack);
     } catch (err) {
       console.error('Gemini API error:', err.message);
       return res.status(502).json({ error: 'Generation failed — please try again' });

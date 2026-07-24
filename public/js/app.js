@@ -47,6 +47,10 @@ if (typeof document !== 'undefined') {
   const regenBtn        = document.getElementById('regenBtn');
   const exportCsvBtn    = document.getElementById('exportCsvBtn');
   const copyBtn         = document.getElementById('copyBtn');
+  const includeTestingCheck  = document.getElementById('includeTestingCheck');
+  const includeBackendCheck  = document.getElementById('includeBackendCheck');
+  const includeBackendLabel  = document.getElementById('includeBackendLabel');
+  const inputCard            = document.querySelector('.input-card');
 
   // ── Toast ──────────────────────────────────────────────────────────
   window.showToast = function showToast(message, type = 'error') {
@@ -67,14 +71,65 @@ if (typeof document !== 'undefined') {
     generateBtn.disabled = !(requirementsEl.value.trim().length > 0 || uploadedImages.length > 0);
   }
   requirementsEl.addEventListener('input', updateButtonState);
+  platformSelect.addEventListener('change', () => {
+    const isApiOnly = platformSelect.value === 'api';
+    includeBackendCheck.disabled = isApiOnly;
+    includeBackendLabel.classList.toggle('disabled', isApiOnly);
+    if (isApiOnly) includeBackendCheck.checked = false;
+    else           includeBackendCheck.checked = true;
+  });
+
+  // ── Loading state ──────────────────────────────────────────────────
+  const STATUS_MESSAGES = [
+    'Analysing requirements…',
+    'Identifying task groups…',
+    'Breaking down edge cases…',
+    'Estimating complexity…',
+    'Calculating mandays…',
+    'Almost there…',
+  ];
+
+  let _loadingInterval = null;
+  let _statusMsgEl     = null;
+
+  function startLoading() {
+    inputCard.classList.add('is-loading');
+    generateBtn.classList.add('is-loading');
+    generateBtn.innerHTML = '<span class="btn-spinner"></span>Generating…';
+    generateBtn.disabled = true;
+
+    _statusMsgEl = document.createElement('p');
+    _statusMsgEl.className = 'status-msg';
+    _statusMsgEl.textContent = STATUS_MESSAGES[0];
+    generateBtn.insertAdjacentElement('afterend', _statusMsgEl);
+
+    let idx = 0;
+    _loadingInterval = setInterval(() => {
+      idx = (idx + 1) % STATUS_MESSAGES.length;
+      _statusMsgEl.textContent = STATUS_MESSAGES[idx];
+    }, 3000);
+  }
+
+  function stopLoading() {
+    inputCard.classList.remove('is-loading');
+    generateBtn.classList.remove('is-loading');
+    generateBtn.innerHTML = 'Generate Estimation';
+    if (_loadingInterval) { clearInterval(_loadingInterval); _loadingInterval = null; }
+    if (_statusMsgEl)     { _statusMsgEl.remove(); _statusMsgEl = null; }
+  }
 
   // ── Thumbnails ─────────────────────────────────────────────────────
   function renderThumbs() {
     thumbRow.innerHTML = '';
-    uploadedImages.forEach((_, i) => {
+    uploadedImages.forEach((img, i) => {
       const thumb = document.createElement('div');
       thumb.className = 'thumb';
-      thumb.textContent = '🖼';
+
+      const preview = document.createElement('img');
+      preview.src = `data:${img.mediaType};base64,${img.data}`;
+      preview.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:7px;';
+      thumb.appendChild(preview);
+
       const x = document.createElement('span');
       x.className = 'x';
       x.textContent = '✕';
@@ -122,17 +177,18 @@ if (typeof document !== 'undefined') {
 
   // ── Generate ───────────────────────────────────────────────────────
   generateBtn.addEventListener('click', async () => {
-    const requirements = requirementsEl.value.trim();
-    const platform     = platformSelect.value;
+    const requirements  = requirementsEl.value.trim();
+    const platform      = platformSelect.value;
+    const includeTesting = includeTestingCheck.checked;
+    const includeBackend = includeBackendCheck.checked && !includeBackendCheck.disabled;
 
-    generateBtn.disabled    = true;
-    generateBtn.textContent = 'Generating…';
+    startLoading();
 
     try {
       const res  = await fetch('/api/estimate', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ requirements, platform, images: uploadedImages }),
+        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend }),
       });
       const data = await res.json();
 
@@ -155,7 +211,7 @@ if (typeof document !== 'undefined') {
           : 'No connection — check your network and try again'
       );
     } finally {
-      generateBtn.textContent = 'Generate Estimation';
+      stopLoading();
       updateButtonState();
     }
   });

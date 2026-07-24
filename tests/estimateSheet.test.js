@@ -9,7 +9,7 @@ const sampleGroups = [
   },
   {
     name: 'Backend',
-    tasks:     [{ name: 'Auth endpoint',   complexity: 'Medium', mandays: 1.5, notes: 'JWT handling' }],
+    tasks:     [{ name: 'Auth endpoint',   complexity: 'Medium', mandays: 1.5, notes: ['JWT requires token rotation on each refresh', 'Must handle concurrent refresh races'] }],
     edgeCases: [],
     testing:   [],
   },
@@ -29,29 +29,41 @@ describe('calculateTotal', () => {
 });
 
 describe('generateCSV', () => {
-  test('first row is the header', () => {
-    expect(generateCSV(sampleGroups).split('\n')[0]).toBe('Group,Subgroup,Task,Complexity,Mandays');
+  test('first row is the header with Notes column', () => {
+    expect(generateCSV(sampleGroups).split('\n')[0]).toBe('Group,Subgroup,Task,Complexity,Mandays,Notes');
   });
   test('core tasks use "Tasks" as subgroup label', () => {
-    expect(generateCSV(sampleGroups)).toContain('Frontend,Tasks,Login form,Low,1');
+    expect(generateCSV(sampleGroups)).toContain('Frontend,Tasks,Login form,Low,1,');
   });
   test('edge cases use "Edge Cases" as subgroup label', () => {
-    expect(generateCSV(sampleGroups)).toContain('Frontend,Edge Cases,Invalid creds,Low,0.5');
+    expect(generateCSV(sampleGroups)).toContain('Frontend,Edge Cases,Invalid creds,Low,0.5,');
   });
   test('testing tasks use "Testing" as subgroup label', () => {
-    expect(generateCSV(sampleGroups)).toContain('Frontend,Testing,Form unit tests,Low,0.5');
+    expect(generateCSV(sampleGroups)).toContain('Frontend,Testing,Form unit tests,Low,0.5,');
   });
   test('task names containing commas are quoted', () => {
     const g = [{ name: 'FE', tasks: [{ name: 'Build nav, footer', complexity: 'Low', mandays: 1.0, notes: null }], edgeCases: [], testing: [] }];
     expect(generateCSV(g)).toContain('"Build nav, footer"');
   });
+  test('notes array is joined with " | " in the Notes column', () => {
+    expect(generateCSV(sampleGroups)).toContain('JWT requires token rotation on each refresh | Must handle concurrent refresh races');
+  });
+  test('null notes renders as empty Notes column', () => {
+    const csv = generateCSV(sampleGroups);
+    const loginRow = csv.split('\n').find(r => r.includes('Login form'));
+    expect(loginRow).toBeDefined();
+    expect(loginRow.endsWith(',')).toBe(true);
+  });
 });
 
 describe('generateClipboardText', () => {
-  test('first row is tab-separated header', () => {
-    expect(generateClipboardText(sampleGroups).split('\n')[0]).toBe('Group\tSubgroup\tTask\tComplexity\tMandays');
+  test('first row is tab-separated header with Notes column', () => {
+    expect(generateClipboardText(sampleGroups).split('\n')[0]).toBe('Group\tSubgroup\tTask\tComplexity\tMandays\tNotes');
   });
   test('data rows are tab-separated', () => {
-    expect(generateClipboardText(sampleGroups)).toContain('Frontend\tTasks\tLogin form\tLow\t1');
+    expect(generateClipboardText(sampleGroups)).toContain('Frontend\tTasks\tLogin form\tLow\t1\t');
+  });
+  test('notes array is joined with " | " in clipboard Notes column', () => {
+    expect(generateClipboardText(sampleGroups)).toContain('JWT requires token rotation on each refresh | Must handle concurrent refresh races');
   });
 });

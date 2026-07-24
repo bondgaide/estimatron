@@ -19,10 +19,13 @@ function tsvEscape(val) {
 }
 
 function generateCSV(groups) {
-  const rows = ['Group,Subgroup,Task,Complexity,Mandays'];
+  const rows = ['Group,Subgroup,Task,Complexity,Mandays,Notes'];
   for (const g of groups) {
     const push = (label, tasks) =>
-      tasks.forEach(t => rows.push([g.name, label, t.name, t.complexity, t.mandays].map(csvEscape).join(',')));
+      tasks.forEach(t => {
+        const notes = Array.isArray(t.notes) ? t.notes.join(' | ') : '';
+        rows.push([g.name, label, t.name, t.complexity, t.mandays, notes].map(csvEscape).join(','));
+      });
     push('Tasks',      g.tasks);
     push('Edge Cases', g.edgeCases);
     push('Testing',    g.testing);
@@ -31,10 +34,13 @@ function generateCSV(groups) {
 }
 
 function generateClipboardText(groups) {
-  const rows = ['Group\tSubgroup\tTask\tComplexity\tMandays'];
+  const rows = ['Group\tSubgroup\tTask\tComplexity\tMandays\tNotes'];
   for (const g of groups) {
     const push = (label, tasks) =>
-      tasks.forEach(t => rows.push([g.name, label, t.name, t.complexity, t.mandays].map(tsvEscape).join('\t')));
+      tasks.forEach(t => {
+        const notes = Array.isArray(t.notes) ? t.notes.join(' | ') : '';
+        rows.push([g.name, label, t.name, t.complexity, t.mandays, notes].map(tsvEscape).join('\t'));
+      });
     push('Tasks',      g.tasks);
     push('Edge Cases', g.edgeCases);
     push('Testing',    g.testing);
@@ -45,19 +51,7 @@ function generateClipboardText(groups) {
 // ── DOM helpers ──────────────────────────────────────────────────────
 
 function syncEditsToEstimate() {
-  if (!window._currentEstimate) return;
-  const inputs = Array.from(document.querySelectorAll('.md-input'));
-  let i = 0;
-  window._currentEstimate.groups.forEach(group => {
-    ['tasks', 'edgeCases', 'testing'].forEach(sub => {
-      group[sub].forEach(task => {
-        if (inputs[i]) {
-          task.mandays = parseFloat(inputs[i].value) || task.mandays;
-          i++;
-        }
-      });
-    });
-  });
+  // no-op: edits are synced live to window._currentEstimate via _taskRef on each event
 }
 
 // ── DOM rendering ────────────────────────────────────────────────────
@@ -87,57 +81,267 @@ function recalcTotal() {
   });
 }
 
-function buildTaskRow(task) {
-  const row  = document.createElement('div');
+// Tracks which add-form is currently open so only one is open at a time
+let _openAddForm = null;
+
+function collapseOpenAddForm() {
+  if (_openAddForm) {
+    _openAddForm.style.display = 'none';
+    if (_openAddForm._addBtn) _openAddForm._addBtn.style.display = '';
+    _openAddForm = null;
+  }
+}
+
+function buildNotesEditable(task, desc, row) {
+  const editable = document.createElement('div');
+  editable.className = 'notes-editable';
+  editable.contentEditable = 'true';
+  const ul = document.createElement('ul');
+  (task.notes || []).forEach(note => {
+    const li = document.createElement('li');
+    li.textContent = note;
+    ul.appendChild(li);
+  });
+  editable.appendChild(ul);
+  editable.addEventListener('blur', () => {
+    const items = Array.from(editable.querySelectorAll('li'))
+      .map(li => li.textContent.trim())
+      .filter(Boolean);
+    if (items.length === 0) {
+      row._taskRef.notes = null;
+      desc.classList.remove('has-notes');
+      editable.replaceWith(buildNotesPlaceholder(task, desc, row));
+    } else {
+      row._taskRef.notes = items;
+    }
+  });
+  return editable;
+}
+
+function buildNotesPlaceholder(task, desc, row) {
+  const placeholder = document.createElement('div');
+  placeholder.className = 'notes-placeholder';
+  placeholder.textContent = '+ Add notes…';
+  placeholder.addEventListener('click', () => {
+    task.notes = [];
+    desc.classList.add('has-notes');
+    const editable = buildNotesEditable(task, desc, row);
+    const li = document.createElement('li');
+    editable.querySelector('ul').appendChild(li);
+    placeholder.replaceWith(editable);
+    editable.focus();
+    const range = document.createRange();
+    const sel = window.getSelection();
+    range.setStart(li, 0);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  return placeholder;
+}
+
+function buildAddForm(taskArr, containerEl, addBtn) {
+  let selectedComplexity = 'Low';
+
+  const form = document.createElement('div');
+  form.className = 'add-form';
+  form._addBtn = addBtn;
+
+  const row1 = document.createElement('div');
+  row1.className = 'add-form-row';
+
+  const nameInput = document.createElement('input');
+  nameInput.className = 'add-form-name';
+  nameInput.placeholder = 'Task name…';
+  nameInput.type = 'text';
+
+  const badgeGroup = document.createElement('div');
+  badgeGroup.className = 'badge-group';
+  ['Low', 'Medium', 'Complex'].forEach((level, i) => {
+    const b = document.createElement('span');
+    b.className = `complexity-badge ${badgeClass(level)}${i !== 0 ? ' dim' : ''}`;
+    b.textContent = level;
+    b.addEventListener('click', () => {
+      selectedComplexity = level;
+      badgeGroup.querySelectorAll('.complexity-badge').forEach(el => el.classList.add('dim'));
+      b.classList.remove('dim');
+    });
+    badgeGroup.appendChild(b);
+  });
+
+  const mdInput = document.createElement('input');
+  mdInput.className = 'add-form-md';
+  mdInput.type = 'number';
+  mdInput.min = '0.5';
+  mdInput.step = '0.5';
+  mdInput.value = '0.5';
+
+  row1.append(nameInput, badgeGroup, mdInput);
+
+  const actions = document.createElement('div');
+  actions.className = 'add-form-actions';
+
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'add-form-confirm';
+  confirmBtn.textContent = 'Add';
+  confirmBtn.type = 'button';
+  confirmBtn.disabled = true;
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'add-form-cancel';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.type = 'button';
+
+  nameInput.addEventListener('input', () => {
+    confirmBtn.disabled = !nameInput.value.trim();
+  });
+
+  function resetForm() {
+    nameInput.value = '';
+    confirmBtn.disabled = true;
+    selectedComplexity = 'Low';
+    badgeGroup.querySelectorAll('.complexity-badge').forEach((b, i) => b.classList.toggle('dim', i !== 0));
+    mdInput.value = '0.5';
+    form.style.display = 'none';
+    addBtn.style.display = '';
+    if (_openAddForm === form) _openAddForm = null;
+  }
+
+  cancelBtn.addEventListener('click', resetForm);
+
+  confirmBtn.addEventListener('click', () => {
+    const newTask = {
+      name: nameInput.value.trim(),
+      complexity: selectedComplexity,
+      mandays: parseFloat(mdInput.value) || 0.5,
+      notes: null,
+    };
+    taskArr.push(newTask);
+    const newRow = buildTaskRow(newTask, taskArr);
+    containerEl.insertBefore(newRow, addBtn);
+    resetForm();
+    recalcTotal();
+  });
+
+  actions.append(cancelBtn, confirmBtn);
+  form.append(row1, actions);
+  return form;
+}
+
+function appendAddControls(containerEl, taskArr) {
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-task-btn';
+  addBtn.textContent = '+ Add task';
+
+  const form = buildAddForm(taskArr, containerEl, addBtn);
+  form.style.display = 'none';
+
+  addBtn.addEventListener('click', () => {
+    collapseOpenAddForm();
+    _openAddForm = form;
+    addBtn.style.display = 'none';
+    form.style.display = '';
+    form.querySelector('.add-form-name').focus();
+  });
+
+  containerEl.appendChild(addBtn);
+  containerEl.appendChild(form);
+}
+
+function buildTaskRow(task, taskArr) {
+  const row = document.createElement('div');
   row.className = 'task-row';
+  row._taskRef = task;
+  row._taskArr = taskArr;
 
   const main = document.createElement('div');
   main.className = 'task-main';
 
-  const nameEl  = document.createElement('span');
-  nameEl.className   = 'task-name';
-  nameEl.textContent = task.name;
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.className = 'task-name-edit';
+  nameInput.value = task.name;
+  nameInput.addEventListener('input', () => { row._taskRef.name = nameInput.value; });
 
-  const badge  = document.createElement('span');
-  badge.className   = `complexity-badge ${badgeClass(task.complexity)}`;
-  badge.textContent = task.complexity;
+  const badgeGroup = document.createElement('div');
+  badgeGroup.className = 'badge-group';
+  ['Low', 'Medium', 'Complex'].forEach(level => {
+    const b = document.createElement('span');
+    b.className = `complexity-badge ${badgeClass(level)}${level !== task.complexity ? ' dim' : ''}`;
+    b.textContent = level;
+    b.addEventListener('click', () => {
+      badgeGroup.querySelectorAll('.complexity-badge').forEach(el => el.classList.add('dim'));
+      b.classList.remove('dim');
+      row._taskRef.complexity = level;
+    });
+    badgeGroup.appendChild(b);
+  });
 
-  const input  = document.createElement('input');
-  input.className = 'md-input';
-  input.type      = 'number';
-  input.min       = '0.5';
-  input.step      = '0.5';
-  input.value     = task.mandays;
-  input.addEventListener('input', recalcTotal);
+  const mdInput = document.createElement('input');
+  mdInput.className = 'md-input';
+  mdInput.type = 'number';
+  mdInput.min = '0.5';
+  mdInput.step = '0.5';
+  mdInput.value = task.mandays;
+  mdInput.addEventListener('input', () => {
+    const val = parseFloat(mdInput.value);
+    if (!isNaN(val) && val >= 0.5) row._taskRef.mandays = val;
+    recalcTotal();
+  });
 
-  const unit  = document.createElement('span');
-  unit.className   = 'md-unit';
+  const unit = document.createElement('span');
+  unit.className = 'md-unit';
   unit.textContent = 'md';
 
-  main.append(nameEl, badge, input, unit);
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'task-remove-btn';
+  removeBtn.title = 'Remove task';
+  removeBtn.textContent = '✕';
+  removeBtn.type = 'button';
+  removeBtn.addEventListener('click', () => {
+    const idx = row._taskArr.indexOf(row._taskRef);
+    if (idx !== -1) row._taskArr.splice(idx, 1);
+    row.remove();
+    recalcTotal();
+  });
+
+  main.append(nameInput, badgeGroup, mdInput, unit, removeBtn);
   row.appendChild(main);
 
-  if (task.notes) {
-    const desc  = document.createElement('div');
-    desc.className = 'task-desc';
+  const desc = document.createElement('div');
+  desc.className = 'task-desc' + (Array.isArray(task.notes) && task.notes.length > 0 ? ' has-notes' : '');
 
-    const label = document.createElement('div');
-    label.className   = 'desc-label';
-    label.textContent = 'Notes';
+  const label = document.createElement('div');
+  label.className = 'desc-label';
+  label.textContent = 'Notes';
+  desc.appendChild(label);
 
-    const text  = document.createElement('div');
-    text.className   = 'desc-text';
-    text.textContent = task.notes;
-
-    desc.append(label, text);
-    row.appendChild(desc);
+  if (Array.isArray(task.notes) && task.notes.length > 0) {
+    desc.appendChild(buildNotesEditable(task, desc, row));
+  } else {
+    desc.appendChild(buildNotesPlaceholder(task, desc, row));
   }
 
+  row.appendChild(desc);
   return row;
 }
 
 function groupSubtotal(group) {
   return calculateTotal([group]);
+}
+
+function buildSubgroup(label, taskArr) {
+  const sub = document.createElement('div');
+  sub.className = 'subgroup';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'subgroup-label';
+  lbl.textContent = label;
+  sub.appendChild(lbl);
+
+  taskArr.forEach(t => sub.appendChild(buildTaskRow(t, taskArr)));
+  appendAddControls(sub, taskArr);
+  return sub;
 }
 
 function buildGroup(group) {
@@ -155,22 +359,11 @@ function buildGroup(group) {
   header.querySelector('.group-subtotal').textContent = groupSubtotal(group).toFixed(1) + ' md';
   el.appendChild(header);
 
-  group.tasks.forEach(t => el.appendChild(buildTaskRow(t)));
+  group.tasks.forEach(t => el.appendChild(buildTaskRow(t, group.tasks)));
+  appendAddControls(el, group.tasks);
 
-  const addSubgroup = (label, tasks) => {
-    if (!tasks.length) return;
-    const sub = document.createElement('div');
-    sub.className = 'subgroup';
-    const lbl = document.createElement('div');
-    lbl.className   = 'subgroup-label';
-    lbl.textContent = label;
-    sub.appendChild(lbl);
-    tasks.forEach(t => sub.appendChild(buildTaskRow(t)));
-    el.appendChild(sub);
-  };
-
-  addSubgroup('Edge Cases', group.edgeCases);
-  addSubgroup('Testing',    group.testing);
+  el.appendChild(buildSubgroup('Edge Cases', group.edgeCases));
+  el.appendChild(buildSubgroup('Testing',    group.testing));
 
   return el;
 }

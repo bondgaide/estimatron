@@ -177,7 +177,7 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
 .group-subtotal { font-size: 13px; color: var(--text3); font-weight: 600; }
 
 .subgroup { margin-top: 14px; }
-.subgroup-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text4); margin-bottom: 8px; padding-left: 8px; border-left: 2px solid var(--border2); }
+.subgroup-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text3); margin-bottom: 8px; padding-left: 8px; border-left: 2px solid var(--text4); }
 
 /* ── Task rows ── */
 .task-row { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; margin-bottom: 7px; overflow: hidden; }

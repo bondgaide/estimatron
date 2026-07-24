@@ -75,8 +75,7 @@ if (typeof document !== 'undefined') {
     const isApiOnly = platformSelect.value === 'api';
     includeBackendCheck.disabled = isApiOnly;
     includeBackendLabel.classList.toggle('disabled', isApiOnly);
-    if (isApiOnly) includeBackendCheck.checked = false;
-    else           includeBackendCheck.checked = true;
+    includeBackendCheck.checked = isApiOnly;
   });
 
   // ── Loading state ──────────────────────────────────────────────────

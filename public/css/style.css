@@ -153,7 +153,21 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
 .estimate-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 32px; }
 
 /* ── Groups ── */
-.group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; cursor: default; }
+.group-header.collapsible { cursor: pointer; user-select: none; }
+.group-header.collapsible:hover .group-name { color: var(--text); }
+.group-chevron {
+  font-size: 12px;
+  color: var(--text4);
+  flex-shrink: 0;
+  transform: rotate(90deg);
+  transition: transform 0.2s;
+  display: none;
+}
+.group-header.collapsible .group-chevron { display: inline; }
+.group-body { display: flex; flex-direction: column; }
+.group.collapsed .group-body { display: none; }
+.group.collapsed .group-chevron { transform: rotate(0deg); }
 .group-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.9px; color: var(--accent); }
 .group-line { flex: 1; height: 1px; background: #1e1030; }
 .group-subtotal { font-size: 13px; color: var(--text3); font-weight: 600; }

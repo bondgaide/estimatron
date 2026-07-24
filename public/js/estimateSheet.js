@@ -344,34 +344,42 @@ function buildSubgroup(label, taskArr) {
   return sub;
 }
 
-function buildGroup(group) {
+function buildGroup(group, collapsible, startCollapsed) {
   const el = document.createElement('div');
-  el.className = 'group';
+  el.className = 'group' + (startCollapsed ? ' collapsed' : '');
 
   const header = document.createElement('div');
-  header.className = 'group-header';
+  header.className = 'group-header' + (collapsible ? ' collapsible' : '');
   header.innerHTML = `
     <span class="group-name"></span>
+    <span class="group-chevron">▶</span>
     <div class="group-line"></div>
     <span class="group-subtotal"></span>
   `;
   header.querySelector('.group-name').textContent = group.name;
   header.querySelector('.group-subtotal').textContent = groupSubtotal(group).toFixed(1) + ' md';
+
+  if (collapsible) {
+    header.addEventListener('click', () => el.classList.toggle('collapsed'));
+  }
   el.appendChild(header);
 
-  group.tasks.forEach(t => el.appendChild(buildTaskRow(t, group.tasks)));
-  appendAddControls(el, group.tasks);
-
-  el.appendChild(buildSubgroup('Edge Cases', group.edgeCases));
-  el.appendChild(buildSubgroup('Testing',    group.testing));
+  const body = document.createElement('div');
+  body.className = 'group-body';
+  group.tasks.forEach(t => body.appendChild(buildTaskRow(t, group.tasks)));
+  appendAddControls(body, group.tasks);
+  body.appendChild(buildSubgroup('Edge Cases', group.edgeCases));
+  body.appendChild(buildSubgroup('Testing',    group.testing));
+  el.appendChild(body);
 
   return el;
 }
 
 function renderEstimate(data) {
-  const body = document.getElementById('estimateBody');
+  const body  = document.getElementById('estimateBody');
+  const multi = data.groups.length > 1;
   body.innerHTML = '';
-  data.groups.forEach(g => body.appendChild(buildGroup(g)));
+  data.groups.forEach(g => body.appendChild(buildGroup(g, multi, multi)));
   recalcTotal();
 }
 

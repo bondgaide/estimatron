@@ -441,6 +441,23 @@ if (typeof document !== 'undefined') {
       window._currentEstimate    = data;
       estimateTitleEl.textContent = data.title || 'Untitled Estimate';
       platformChipEl.textContent  = PLATFORM_LABELS[platform];
+
+      const metaChipsEl = document.getElementById('metaChips');
+      metaChipsEl.innerHTML = '';
+      if (includeAiAssist) {
+        const c = document.createElement('span');
+        c.className = 'meta-chip ai-assist-chip';
+        c.textContent = 'AI Assist';
+        metaChipsEl.appendChild(c);
+      }
+      const hasBackend = data.groups.some(g => ['BFF', 'Orchestrator', 'Adaptor'].includes(g.name));
+      if (hasBackend && platform !== 'api') {
+        const c = document.createElement('span');
+        c.className = 'meta-chip backend-chip';
+        c.textContent = 'Backend';
+        metaChipsEl.appendChild(c);
+      }
+
       if (window.renderEstimate) window.renderEstimate(data);
       estimateSection.classList.add('visible');
       mainEl.classList.add('has-estimate');

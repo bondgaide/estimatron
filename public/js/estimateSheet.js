@@ -228,10 +228,16 @@ function buildAddForm(taskArr, containerEl, addBtn) {
   return form;
 }
 
-function appendAddControls(containerEl, taskArr) {
+function groupDisplayName(name) {
+  if (name === 'iOS') return 'iOS (Native)';
+  if (name === 'Android') return 'Android (Native)';
+  return name;
+}
+
+function appendAddControls(containerEl, taskArr, btnLabel) {
   const addBtn = document.createElement('button');
   addBtn.className = 'add-task-btn';
-  addBtn.textContent = '+ Add task';
+  addBtn.textContent = btnLabel || '+ Add task';
 
   const form = buildAddForm(taskArr, containerEl, addBtn);
   form.style.display = 'none';
@@ -330,7 +336,7 @@ function groupSubtotal(group) {
   return calculateTotal([group]);
 }
 
-function buildSubgroup(label, taskArr) {
+function buildSubgroup(label, taskArr, groupName) {
   const sub = document.createElement('div');
   sub.className = 'subgroup';
 
@@ -339,8 +345,13 @@ function buildSubgroup(label, taskArr) {
   lbl.textContent = label;
   sub.appendChild(lbl);
 
+  const dn = groupDisplayName(groupName);
+  const btnLabel = label === 'Edge Cases'
+    ? `+ Add ${dn} Edge Case`
+    : `+ Add ${dn} Test`;
+
   taskArr.forEach(t => sub.appendChild(buildTaskRow(t, taskArr)));
-  appendAddControls(sub, taskArr);
+  appendAddControls(sub, taskArr, btnLabel);
   return sub;
 }
 
@@ -367,9 +378,9 @@ function buildGroup(group, collapsible, startCollapsed) {
   const body = document.createElement('div');
   body.className = 'group-body';
   group.tasks.forEach(t => body.appendChild(buildTaskRow(t, group.tasks)));
-  appendAddControls(body, group.tasks);
-  body.appendChild(buildSubgroup('Edge Cases', group.edgeCases));
-  body.appendChild(buildSubgroup('Testing',    group.testing));
+  appendAddControls(body, group.tasks, `+ Add ${groupDisplayName(group.name)} Task`);
+  body.appendChild(buildSubgroup('Edge Cases', group.edgeCases, group.name));
+  body.appendChild(buildSubgroup('Testing',    group.testing,   group.name));
   el.appendChild(body);
 
   return el;

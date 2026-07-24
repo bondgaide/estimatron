@@ -32,6 +32,17 @@
               <option value="api">API / Backend only</option>
             </select>
           </div>
+          <div class="includes-row">
+            <span class="includes-label">Includes</span>
+            <label class="check-label" for="includeTestingCheck">
+              <input type="checkbox" id="includeTestingCheck" checked />
+              Testing
+            </label>
+            <label class="check-label" id="includeBackendLabel" for="includeBackendCheck">
+              <input type="checkbox" id="includeBackendCheck" checked />
+              Backend
+            </label>
+          </div>
           <textarea
             class="textarea"
             id="requirements"
@@ -41,8 +52,11 @@
 
         <div class="upload-col">
           <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">🖼️</div>
-            <div class="upload-text">Drop wireframes or screens</div>
+            <svg class="upload-icon-svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path d="M16 21V9M16 9l-6 6M16 9l6 6" stroke="#A100FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 25h22" stroke="#A100FF" stroke-width="2.2" stroke-linecap="round"/>
+            </svg>
+            <div class="upload-text">Drop wireframes, screen designs here</div>
             <div class="upload-sub">PNG · JPG · WEBP · Multiple files OK</div>
           </div>
           <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" multiple hidden />

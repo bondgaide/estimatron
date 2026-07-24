@@ -79,6 +79,9 @@ if (typeof document !== 'undefined') {
   const includeTestingCheck  = document.getElementById('includeTestingCheck');
   const includeBackendCheck  = document.getElementById('includeBackendCheck');
   const includeBackendLabel  = document.getElementById('includeBackendLabel');
+  const includeGaCheck        = document.getElementById('includeGaCheck');
+  const includeGaLabel        = document.getElementById('includeGaLabel');
+  const includeAiAssistCheck  = document.getElementById('includeAiAssistCheck');
   const inputCard            = document.querySelector('.input-card');
   const techChipWrap  = document.getElementById('techChipWrap');
   const techChipInput = document.getElementById('techChipInput');
@@ -109,6 +112,9 @@ if (typeof document !== 'undefined') {
     includeBackendCheck.disabled = isApiOnly;
     includeBackendLabel.classList.toggle('disabled', isApiOnly);
     includeBackendCheck.checked = isApiOnly;
+    includeGaCheck.disabled = isApiOnly;
+    includeGaLabel.classList.toggle('disabled', isApiOnly);
+    if (isApiOnly) includeGaCheck.checked = false;
     if (techDropdown.classList.contains('open')) renderTechDropdown();
   });
   includeBackendCheck.addEventListener('change', () => {
@@ -356,6 +362,8 @@ if (typeof document !== 'undefined') {
     const platform      = platformSelect.value;
     const includeTesting = includeTestingCheck.checked;
     const includeBackend = includeBackendCheck.checked && !includeBackendCheck.disabled;
+    const includeGa       = includeGaCheck.checked && !includeGaCheck.disabled;
+    const includeAiAssist = includeAiAssistCheck.checked;
 
     startLoading();
 
@@ -363,7 +371,7 @@ if (typeof document !== 'undefined') {
       const res  = await fetch('/api/estimate', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend, techStack: techChips.map(c => c.label) }),
+        body:    JSON.stringify({ requirements, platform, images: uploadedImages, includeTesting, includeBackend, techStack: techChips.map(c => c.label), includeGa, includeAiAssist }),
       });
       const data = await res.json();
 

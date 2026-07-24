@@ -8,6 +8,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const VALID_PLATFORMS = ['web', 'ios', 'android', 'cross', 'api'];
+const MODELS = ['gemini-3.5-flash', 'gemini-2.5-flash'];
 
 const SYSTEM_PROMPT = `You are a senior software architect and estimation expert specialising in breaking down software feature requirements into realistic manday estimates for development teams.
 
@@ -99,10 +100,10 @@ function validateSchema(data) {
   return true;
 }
 
-async function callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents) {
+async function callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents, model) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-3.5-flash',
+  const geminiModel = genAI.getGenerativeModel({
+    model,
     systemInstruction: SYSTEM_PROMPT,
   });
 
@@ -126,7 +127,7 @@ async function callGemini(requirements, platform, images, includeTesting, includ
   userText += instructions;
   parts.push({ text: userText });
 
-  const result = await model.generateContent(parts);
+  const result = await geminiModel.generateContent(parts);
   return result.response.text();
 }
 
@@ -140,27 +141,38 @@ app.post('/api/estimate', async (req, res) => {
     return res.status(400).json({ error: 'invalid platform value' });
   }
 
-  for (let attempt = 0; attempt <= 1; attempt++) {
-    let text;
-    try {
-      text = await callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents);
-    } catch (err) {
-      console.error('Gemini API error:', err.message);
-      return res.status(502).json({ error: 'Generation failed — please try again' });
+  for (const model of MODELS) {
+    let overloaded = false;
+
+    for (let attempt = 0; attempt <= 1; attempt++) {
+      let text;
+      try {
+        text = await callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents, model);
+      } catch (err) {
+        console.error(`Gemini API error (${model}):`, err.message);
+        if (err.message.includes('503')) {
+          overloaded = true;
+          break;
+        }
+        return res.status(502).json({ error: 'Generation failed — please try again' });
+      }
+
+      try {
+        const data = JSON.parse(text);
+        if (data.valid === false) {
+          return res.status(400).json({ error: 'Requirements don\'t look like a software feature description — please provide more detail.' });
+        }
+        if (validateSchema(data)) return res.json(data);
+      } catch {
+        // invalid JSON or schema — retry on first attempt
+      }
     }
 
-    try {
-      const data = JSON.parse(text);
-      if (data.valid === false) {
-        return res.status(400).json({ error: 'Requirements don\'t look like a software feature description — please provide more detail.' });
-      }
-      if (validateSchema(data)) return res.json(data);
-    } catch {
-      // invalid JSON or schema — retry on first attempt
-    }
+    if (!overloaded) return res.status(502).json({ error: 'Generation failed — please try again' });
+    // model was overloaded — fall through to next model
   }
 
-  return res.status(502).json({ error: 'Generation failed — please try again' });
+  return res.status(502).json({ error: 'Gemini is currently overloaded — please try again in a moment' });
 });
 
 const PORT = process.env.PORT || 3000;

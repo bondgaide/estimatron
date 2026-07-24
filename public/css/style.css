@@ -247,6 +247,9 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
 .toast.toast-success { border-color: #166534; color: #86efac; }
 .toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
+/* ── Footer ── */
+.app-footer { text-align: center; padding: 20px; font-size: 11px; color: var(--text4); letter-spacing: 0.5px; }
+
 /* ── Light mode ── */
 html.light {
   --bg:         #f4f6fb;

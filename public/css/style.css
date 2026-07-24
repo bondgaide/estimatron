@@ -195,6 +195,8 @@ body { height: 100%; width: 100%; max-width: 100%; overflow-x: hidden; font-fami
 
 .md-input { width: 52px; background: #0f1117; border: 1px solid var(--border2); border-radius: 6px; text-align: center; font-size: 14px; font-weight: 700; color: var(--accent); padding: 5px 6px; outline: none; transition: border-color 0.15s; flex-shrink: 0; }
 .md-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+.md-input::-webkit-inner-spin-button, .md-input::-webkit-outer-spin-button, .add-form-md::-webkit-inner-spin-button, .add-form-md::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.md-input, .add-form-md { -moz-appearance: textfield; appearance: textfield; }
 .md-unit { font-size: 12px; color: var(--text3); flex-shrink: 0; padding-top: 6px; }
 
 /* ── Remove task button ── */

@@ -58,7 +58,7 @@ For each task item:
   - Low: straightforward, well-understood pattern, under 1 day
   - Medium: non-obvious decisions, cross-system coordination, 1–2 days
   - Complex: significant unknowns, tricky integrations, or many interacting edge cases, 2+ days
-- mandays: estimate in 0.5 increments, minimum 0.5
+- mandays: any positive number in 0.1 increments, minimum 0.1 (AI-assisted tasks may be well under 0.5)
 - notes: for Medium or Complex tasks, return a JSON array of 2–4 strings — each string is one specific bullet point explaining WHY this task is non-trivial or what exactly must be handled. For Low tasks, return null.
 
 INPUT VALIDATION — Before generating anything, decide whether the "Feature requirements:" text is a coherent software feature description. Reject it if it is: random characters, keyboard mashing, a single word with no context, a generic test string (e.g. "test", "asdf", "hello"), or otherwise not describing real software functionality. If rejected, return ONLY this JSON and nothing else: {"valid": false}
@@ -90,7 +90,7 @@ function validateSchema(data) {
     for (const task of [...group.tasks, ...group.edgeCases, ...group.testing]) {
       if (typeof task.name !== 'string')                          return false;
       if (!['Low', 'Medium', 'Complex'].includes(task.complexity)) return false;
-      if (typeof task.mandays !== 'number' || task.mandays < 0.5) return false;
+      if (typeof task.mandays !== 'number' || task.mandays <= 0) return false;
       if (task.notes != null) {
         if (!Array.isArray(task.notes) || task.notes.length === 0) return false;
         if (!task.notes.every(n => typeof n === 'string' && n.trim().length > 0)) return false;

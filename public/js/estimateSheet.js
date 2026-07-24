@@ -172,8 +172,8 @@ function buildAddForm(taskArr, containerEl, addBtn) {
   const mdInput = document.createElement('input');
   mdInput.className = 'add-form-md';
   mdInput.type = 'number';
-  mdInput.min = '0.5';
-  mdInput.step = '0.5';
+  mdInput.min = '0.1';
+  mdInput.step = 'any';
   mdInput.value = '0.5';
 
   row1.append(nameInput, badgeGroup, mdInput);
@@ -280,12 +280,12 @@ function buildTaskRow(task, taskArr) {
   const mdInput = document.createElement('input');
   mdInput.className = 'md-input';
   mdInput.type = 'number';
-  mdInput.min = '0.5';
-  mdInput.step = '0.5';
+  mdInput.min = '0.1';
+  mdInput.step = 'any';
   mdInput.value = task.mandays;
   mdInput.addEventListener('input', () => {
     const val = parseFloat(mdInput.value);
-    if (!isNaN(val) && val >= 0.5) row._taskRef.mandays = val;
+    if (!isNaN(val) && val > 0) row._taskRef.mandays = val;
     recalcTotal();
   });
 

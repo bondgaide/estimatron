@@ -8,7 +8,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const VALID_PLATFORMS = ['web', 'ios', 'android', 'cross', 'api'];
-const MODELS = ['gemini-3.5-flash', 'gemini-2.5-flash'];
+const MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
 
 const SYSTEM_PROMPT = `You are a senior software architect and estimation expert specialising in breaking down software feature requirements into realistic manday estimates for development teams.
 
@@ -151,7 +151,7 @@ app.post('/api/estimate', async (req, res) => {
         text = await callGemini(requirements, platform, images, includeTesting, includeBackend, techStack, includeGa, includeAiAssist, existingComponents, model);
       } catch (err) {
         console.error(`Gemini API error (${model}):`, err.message);
-        if (err.message.includes('503')) {
+        if (err.message.includes('503') || err.message.includes('404')) {
           overloaded = true;
           break;
         }

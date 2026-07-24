@@ -188,7 +188,8 @@ if (typeof document !== 'undefined') {
       rm.type = 'button';
       rm.className = 'tech-chip-remove';
       rm.innerHTML = '&times;';
-      rm.addEventListener('click', () => {
+      rm.addEventListener('click', (e) => {
+        e.stopPropagation();
         existingChips.splice(i, 1);
         renderExistingChips();
       });
@@ -415,6 +416,8 @@ if (typeof document !== 'undefined') {
     const includeAiAssist = includeAiAssistCheck.checked;
 
     if (!requirements && uploadedImages.length === 0) {
+      requirementsEl.classList.remove('error');
+      void requirementsEl.offsetWidth;
       requirementsEl.classList.add('error');
       showToast('Please describe the feature you want to estimate');
       return;
